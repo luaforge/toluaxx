@@ -1,0 +1,44 @@
+$#include "tvariable.hxx"
+
+struct A{
+  int i;
+  float f;
+  double d;
+  char* s;
+  void* v;
+  string n;
+};
+
+struct B{
+  A a;
+  B* b;
+};
+
+union U{
+  int i;
+  float f;
+};
+
+extern int i;
+extern float f;
+extern double d;
+extern const char* s;
+extern void* v;
+extern string n;
+extern A a;
+extern B* b;
+extern U u;
+
+module M {
+  extern int mi;
+  extern float mf;
+  extern double md;
+  extern const char* ms;
+  extern void* mv;
+  extern string mn;
+  extern A a;
+  extern A ma;
+  extern B* mb;
+}
+
+void init();

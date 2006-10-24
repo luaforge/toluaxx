@@ -1,0 +1,16 @@
+
+$int a;
+$extern int a;
+
+$pfile"idirective.pxx"
+
+$<
+ a = 3;
+$>
+
+$[
+A = 4
+$]
+
+$lfile"idirective.lua"
+ 

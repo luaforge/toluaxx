@@ -1,0 +1,14 @@
+
+$#include "tnamespace.hxx"
+
+namespace A{
+  int a;
+}
+
+namespace B{
+  int b;
+}
+
+namespace C{
+  int c;
+}

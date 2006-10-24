@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="GENERATOR" CONTENT="lunique">
+<META NAME="Author" CONTENT="Waldemar Celes, Ariel Manzur, Vetaly Phoenix, Konstantin Snegovick">
+<link href="style.css" rel="stylesheet" type="text/css"></link>
+<title>toLuaxx - binding c/c++ code to lua</title>
+</HEAD>
+
+<body>
+<table id=pagestruct>
+  <!-- header -->
+  <tr><td id=pagetop>
+    <table id=pagetop><tr>
+      <td id=pagelogo>
+	<img src="logo.png">
+      </td>
+      <td id=pagemenu>
+	<h1>toLuaxx - Windows installation guide</h1>
+	<a href="index.html">home</a>
+	<a href="index.html#news">news</a>
+	<a href="index.html#download">download</a>
+	<a href="index.html#documentation">documentation</a>
+	<a href="#installing">installing</a>
+	<a href="mailto:toluaxx-commit@luaforge.net">contact</a>
+      </td>
+    </tr></table>
+  </td></tr>
+  <!-- content -->
+  <tr><td id=content>
+<ul>
+<li><a href = "#msvc">Building with Microsoft Compiler</a></li>
+<li><a href = "#mingw">Building with gcc (MINGW)</a></li>
+<li><a href = "#quest">Any questions ?</a></li>
+</ul>
+<a name = "msvc"></a>
+<h2>Building with Microsoft Compiler</h2>
+<hr>
+<h3>Minimum requirements</h3>
+<p>
+The following tools are required :
+<ul>
+	<li> Microsoft C/C++ Compiler v 14.00.50727.42 or newer (from Microsoft Visual Studio 8. Please reply about MSVS 7 compliance)</li>
+	<li> GNU make utility ( see chapter GNU make installation instructions )</li>
+</ul>
+In addition you have to download and build <a href = "http://www.lua.org/">lua</a>.
+<hr>
+<h3>GNU make installation instructions</h3>
+<p>
+GNU make is a very powerful utility for automating project building routines. You can download
+windows version at <a href = "http://www.mingw.org/download.shtml">mingw download page</a>.
+<p>
+We'll suggest that you are installing make to the C:\GNUtools directory. After installation
+you have to rename the make binary from something like mingw32-make.exe to make.exe (just for your convenience), then 
+set your PATH environment variable to correspond to your GNU make installation directory. 
+For our directory (C:\GNUtools) you can do it like this :
+<ul>
+	<li> run shell : start - run - type in 'cmd' (without quotes)</li>
+	<li> type in 'set PATH=C:\GNUtools;%PATH%' (without quotes)</li>
+</ul>
+<p>
+Now type make in your shell. You will receive a message like this one bellow
+<p>
+make: *** No targets specified and no makefile found.  Stop.
+<p>
+If you can see this message, then your GNU make is installed correctly. Otherwise make sure that you
+provided correct PATH to your make executable
+<hr>
+<h3>Building toluaxx</h3>
+<p>
+We suggest that you have already unpacked the sources to some directory (e.g. C:\toluaxx).
+Run your shell and change directory to C:\toluaxx.
+Copy your lua headers to include/lua5.1 directory and lua5.1.lib to lib directory. 
+If your MS Visual Studio installation path differs from C:\Program Files\Microsoft Visual Studio 8 then 
+open config.win32-msvs.local with your favourite text editor uncomment VSPATH variable (remove '#') and
+change this string in compliance with your MS Visual Studio installation path.
+<p>
+Run make in your shell. If you received something like this at the end of the build process
+<p><br>
+Build bin complete....
+<br>
+Build include complete....
+<br>
+Build all complete....
+<p>
+<br>then everything is OK, check bin and lib directories to make sure that build was successful
+
+<h4>Known troubles :</h1>
+<p><ul>
+<li>It is highly recommended to disable unicode support while compilling toluaxx and lua with msvc 8 compiler</li>
+</ul>
+<p>If your problem is not listed above try <a href = "#quest">Any questions section</a>
+
+<hr>
+<a name = "mingw"></a>
+<h2>Building with GCC (MINGW)<h2>
+<hr>
+<h3>Minimum requirements</h3>
+<p>
+The following tools are required :
+<ul>
+	<li> Basic MINGW installation including GCC, G++, make, binutils, Windows API, MinGW Runtime</li>
+</ul>
+<p>All these packages and installation instructions you can find at <a href = "http://www.mingw.org/download.shtml">mingw download page</a>
+
+<hr>
+<h3>Building toluaxx</h3>
+<p>Building toluaxx is rather easy with mingw:<br>
+Specify correct path to your lua5.1/src directory in config.win32-mingw.local by setting LUA.I and LUA.L variables. Don't foget to uncomment these variables 
+Run your shell, navigate to the toluaxx directory and run make
+<hr>
+<a name = "quest"></a>
+<h2>Any questions?</h2>
+<p>Here are some links which will help you to find answers to your questions:
+<ul>
+<li><a href = "customizing_makef.htm">customizing toluaxx Makefile</a></li>
+<li><a href = "devnotes.htm">Developers notes</a></li>
+<!--<li></li>-->
+</ul>
+<hr>
+toluaxx 2006
+  </td></tr>
+  <tr><td id=footer></td></tr>
+</table>
+</body>
+  

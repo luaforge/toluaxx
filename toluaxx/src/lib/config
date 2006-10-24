@@ -1,0 +1,28 @@
+##                                    ##
+##  Copyright (C) 2006 by PhoeniX IV  ##
+##                                    ##
+##  RareSky Community 2012            ##
+##                                    ##
+##               Config GNU Makefile  ##
+##                                    ##
+
+##
+##  toLuaxx library make config
+##
+
+lib.name=$(call L.n,$(LIB.NAME))
+#lib.name=$(LIB.NAME)
+lib.state=enable
+lib.runable=disable
+lib.static=$(LIB.STATIC)
+lib.shared=$(LIB.SHARED)
+
+ifeq ($(PKGCONFIG),enable)
+$(PREFIX)/lib/pkgconfig/toluaxx5.1.pc: src/lib/toluaxx5.1.pc
+	@$(ECHO) Install $^ to $@....
+	@$(EXEC) $(CP) $^ $@
+lib.install.prep: $(PREFIX)/lib/pkgconfig/toluaxx5.1.pc
+lib.uninstall.prep:
+	@$(ECHO) Uninstall $(PREFIX)/lib/pkgconfig/toluaxx5.1.pc....
+	@$(EXEC) $(RM) $(PREFIX)/lib/pkgconfig/toluaxx5.1.pc
+endif

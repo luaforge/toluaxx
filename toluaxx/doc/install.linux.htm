@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="lunique">
+<meta name="Author" content="Waldemar Celes, Ariel Manzur, Vetaly Phoenix, Konstantin Snegovick">
+<link href="style.css" rel="stylesheet" type="text/css"><title>toLuaxx - binding c/c++ code to lua</title></head><body>
+<table id="pagestruct">
+  <!-- header -->
+  <tbody><tr><td id="pagetop">
+    <table id="pagetop"><tbody><tr>
+      <td id="pagelogo">
+	<img src="logo.png">
+      </td>
+      <td id="pagemenu">
+	<h1>toLuaxx - Building on GNU/Linux</h1>
+	<a href="index.html">home</a>
+	<a href="index.html#news">news</a>
+	<a href="index.html#download">download</a>
+	<a href="index.html#documentation">documentation</a>
+	<a href="#installing">installing</a>
+	<a href="mailto:toluaxx-commit@luaforge.net">contact</a>
+      </td>
+    </tr></tbody></table>
+  </td></tr>
+  <!-- content -->
+  <tr><td id="content">
+<h2>Building with GCC Compiler</h2>
+<hr>
+<h3>Lua5.1 installation</h3>
+<p>
+This version requires lua5.1 (Check that lua is built as shared module)
+You can get the latest version at <a href="http://www.lua.org/">lua site</a>.
+</p><hr>
+<h3>Building toluaxx</h3>
+<p>
+GNU make is a very powerful utility for automating project building routines.
+To build toluaxx5.1 enter in terminal:
+</p><p>$ cd /path/to/toluaxx51/dist
+<br>$ make
+</p><p>If you received something like this at the end of the build process
+</p><p><br>
+Build lib complete....
+<br>
+Build bin complete....
+<br>
+Build include complete....
+<br>
+Build all complete....
+</p><p>
+<br>then everything is OK, check bin and lib directories to make sure that build was successful
+</p><h3>Installing toluaxx</h3>
+<p>To install toluaxx5.1 enter in terminal (as root or with sudo):
+</p><p>$ make install
+</p><p>Optionally may be specified PREFIX variable in
+`config.linux-gcc.local` config file or passed with `make install`
+command, for example:
+</p><p>$ make install PREFIX=/usr
+</p><p>Default `PREFIX=/usr/local`.
+</p><p>
+</p><h3>Uninstalling toluaxx</h3>
+<p>For uninstall toluaxx5.1 enter in terminal (as root or with sudo):
+</p><p>$ make uninstall
+</p><p>
+  </p>
+<hr>
+toluaxx 2006
+</td></tr>
+  <tr><td id="footer"></td></tr>
+</tbody></table>
+</body></html>

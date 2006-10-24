@@ -1,0 +1,33 @@
+##                                    ##
+##  Copyright (C) 2006 by PhoeniX IV  ##
+##                                    ##
+##  RareSky Community 2012            ##
+##                                    ##
+##               Config GNU Makefile  ##
+##                                    ##
+
+##
+##  toLuaxx binary make config
+##
+
+bin.name=$(RUN.NAME)
+bin.state=enable
+bin.runable=enable
+bin.static=disable
+bin.shared=disable
+bin.dep=lib
+bin.libs=$(LIB.NAME)
+
+ifeq ($(DEBUG),disable)
+  BIND=enable
+endif
+
+ifeq ($(SYMLINK),enable)
+$(PREFIX)/bin/$(NAME): $(PREFIX)/bin/$(bin.name).run
+	@$(ECHO) SymLink $^ to $@....
+	@$(EXEC) $(LN) $^ $@
+bin.install.post: $(PREFIX)/bin/$(NAME)
+bin.uninstall.prep:
+	@$(ECHO) Remove SymLink $(PREFIX)/bin/$(NAME)....
+	@$(EXEC) $(RM) $(PREFIX)/bin/$(NAME)
+endif

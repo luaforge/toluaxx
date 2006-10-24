@@ -1,0 +1,22 @@
+##                                    ##
+##  Copyright (C) 2006 by PhoeniX IV  ##
+##                                    ##
+##  RareSky Community 2012            ##
+##                                    ##
+##               Config GNU Makefile  ##
+##                                    ##
+
+##
+##  toLuaxx binary make config
+##
+
+include.name=$(INC.NAME)
+include.path=$(INC.PATH)
+include.state=enable
+include.header=enable
+
+include.install.prep:
+	@$(EXEC) $(MD) $(PREFIX)/$(INC.PATH)
+
+include.uninstall.post:
+	@$(EXEC) $(RD) $(PREFIX)/$(INC.PATH)
