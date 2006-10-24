@@ -1,0 +1,47 @@
+body { background-color:#ffffff;
+       background-image:url("bg.png"); }
+
+h1 { font-size:32px;
+     color: #0d00a7; }
+
+#pagestruct { background-color: transparent;
+              width: '100%'; height: '100%'; }
+
+#pagetop { width:'100%'; }
+#pagetitle { width:'100%'; }
+#pagelogo { width:128px; height:128px; }
+
+#pagemenu a:before { content: ".:";
+                    display: block;
+                    margin-left: 5px;
+                    text-align: right;
+                    text-decoration: none; }
+#pagemenu a:after { content: ":.";
+                   display: block;
+                   margin-right: 5px;
+                   text-align: right;
+                   text-decoration: none; }
+#pagemenu { text-align: center;
+           width: '100%'; }
+#pagemenu a, a.link, a.active, a.visited{ color:#0d00a0;
+                                         text-align:center;
+                                         text-decoration:none;
+                                         background-color:transparent;
+                                         width:128px; height:32px; }
+#pagemenu a:hover{ color:#ff00a0;
+                  text-decoration:none; }
+
+#content { text-align:left;
+           font-size:12px;
+           width:'100%'; }
+#topmenu a, a.link, a.active, a.visited{ color:#0d00a0;
+                                         text-align:center;
+                                         text-decoration:none;
+                                         background-color:transparent;
+                                         width:128px; height:32px; }
+#topmenu a:hover{ color:#ff00a0;
+                  text-decoration:none; }
+
+#content {
+	font-size:16px;
+}

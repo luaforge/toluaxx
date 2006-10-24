@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="GENERATOR" CONTENT="lunique">
+<META NAME="Author" CONTENT="Waldemar Celes, Ariel Manzur, Vetaly Phoenix, Konstantin Snegovick">
+<link href="style.css" rel="stylesheet" type="text/css"></link>
+<title>toLuaxx - binding c/c++ code to lua</title>
+</HEAD>
+
+<body>
+<table id=pagestruct>
+  <!-- header -->
+  <tr><td id=pagetop>
+    <table id=pagetop><tr>
+      <td id=pagelogo>
+	<img src="logo.png">
+      </td>
+      <td id=pagemenu>
+	<h1>Customizing Makefile</h1>
+	<a href="index.html">home</a>
+	<a href="index.html#news">news</a>
+	<a href="index.html#download">download</a>
+	<a href="index.html#documentation">documentation</a>
+	<a href="#installing">installing</a>
+	<a href="mailto:toluaxx-commit@luaforge.net">contact</a>
+      </td>
+    </tr></table>
+  </td></tr>
+  <!-- content -->
+  <tr><td id=content>
+<p>Global variables review<br>
+X - extensions properties<br>
+X.CXX - c++ source extension<br>
+X.OXX - c++ object extension<br>
+X.SO<br>
+<br>
+U - utily properties<br>
+U.EH - echo call<br>
+U.RM - remove call<br>
+U.CP - copy call<br>
+U.MD - mkdir call<br>
+U.RD - rmdir call<br>
+<br>
+C - compiler properties<br>
+C.XX - compiler call ($(1)-input source, $(2)-output object, $(3)-options)<br>
+C.I - include path call ($(1)-include paths)<br>
+C.I.path - global include paths<br>
+C.FLAGS - global compiler options<br>
+C.FLAGS.DEBUG - debug compiler options<br>
+C.FLAGS.RELEASE - release compiler options<br>
+<br>
+L - linker options<br>
+L.XX - linker call ($(1)-input objects, $(1)-output file, $(3)-options)<br>
+L.L - link path call ($(1)-link paths)<br>
+L.l - link library call ($(1)-libraries)<br>
+L.L.path - global link paths<br>
+L.l.libs - global libs<br>
+L.OPTS - global linker options<br>
+<p>
+For more common options (e.g. compiler path and other) please refer to config.&lt;your_platform-compiler&gt;.local file.
+This file is pretty self explanatory.
+<hr>
+toluaxx 2006
+  </td></tr>
+  <tr><td id=footer></td></tr>
+</table>
+</body>
+  

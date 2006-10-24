@@ -1,0 +1,6 @@
+
+ENVSETS=enable
+
+# path to your msvs installation
+#VSPATH="C:\Program Files\Microsoft Visual Studio 8"
+

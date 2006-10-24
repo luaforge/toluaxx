@@ -1,0 +1,29 @@
+$#include"tindex.hxx"
+
+class ELEM{
+  ELEM();
+  ~ELEM();
+  void value(int*i=0,string*&s="",ELEM*&e=NULL);
+  bool operator==(const ELEM&);
+  bool operator()();
+  string operator~();
+};
+
+class NUM_MAP{
+  NUM_MAP();
+  NUM_MAP(int i);
+  ~NUM_MAP();
+  ELEM * & operator[](int);
+  void operator()(int&i=0 asnil,ELEM*&e=NULL);
+  operator string();
+  int operator~();
+};
+
+class STR_MAP{
+  STR_MAP();
+  ~STR_MAP();
+  ELEM * & operator[](string);
+  void operator()(string&i="" asnil,ELEM*&e=NULL);
+  operator string();
+  int operator~();
+};

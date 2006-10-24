@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="GENERATOR" CONTENT="lunique">
+<META NAME="Author" CONTENT="Waldemar Celes, Ariel Manzur, Vetaly Phoenix, Konstantin Snegovick">
+<link href="style.css" rel="stylesheet" type="text/css"></link>
+<title>toLuaxx - binding c/c++ code to lua</title>
+</HEAD>
+
+<body>
+<table id=pagestruct>
+  <!-- header -->
+  <tr><td id=pagetop>
+    <table id=pagetop><tr>
+      <td id=pagelogo>
+	<img src="logo.png">
+      </td>
+      <td id=pagemenu>
+	<h1>Developers Notes</h1>
+	<a href="index.html">home</a>
+	<a href="index.html#news">news</a>
+	<a href="index.html#download">download</a>
+	<a href="index.html#documentation">documentation</a>
+	<a href="#installing">installing</a>
+	<a href="mailto:toluaxx-commit@luaforge.net">contact</a>
+      </td>
+    </tr></table>
+  </td></tr>
+  <!-- content -->
+  <tr><td id=content>
+<p><a name="2006-10-04">2006-10-04:</a>
+  <hr>
+	<p>Added the default specificator "asnil". The variable would be interpreted
+	as nil if it is equal to the default value.
+
+	<p>Example
+<pre>
+	------asnil-test.hxx----------------
+	class TCLASS{
+	       ....
+	 public:
+	  string menu;
+	  void item(string&name){
+	    int p,s;
+	    if((p=menu.find(name+":"))&lt;menu.length()){
+	      p=p+name.length()+1;
+	      s=menu.find(" ",p);
+	      name=menu.substr(p,s-p);
+	    }else name="";
+	  }
+	};
+	------asnil-test.pxx----------------
+	class TCLASS{
+	       ....
+	 public:
+	  string menu;
+	  void item(string&name="" asnil);
+	};
+	------asnil-test.lua----------------
+	require"asnil-test"
+	local t=TCLASS()
+	t.menu="first:call second:of third:cthulhu"
+	assert(t:item("first")=="call")
+	assert(t:item("second")=="of")
+	assert(t:item("third")=="cthulhu")
+	assert(t:item("fourth"==nil)
+>------asnil-test.hxx----------------
+	class TCLASS{
+	       ....
+	 public:
+	  string menu;
+	  void item(string&name){
+	    int p,s;
+	    if((p=menu.find(name+":"))&lt;menu.length()){
+	      p=p+name.length()+1;
+	      s=menu.find(" ",p);
+	      name=menu.substr(p,s-p);
+	    }else name="";
+	  }
+	};
+	------asnil-test.pxx----------------
+	class TCLASS{
+	       ....
+	 public:
+	  string menu;
+	  void item(string&name="" asnil);
+	};
+	------asnil-test.lua----------------
+	require"asnil-test"
+	local t=TCLASS()
+	t.menu="first:call second:of third:cthulhu"
+	assert(t:item("first")=="call")
+	assert(t:item("second")=="of")
+	assert(t:item("third")=="cthulhu")
+	assert(t:item("fourth"==nil)
+</pre>
+	
+	This is useful in iterators see src/tests/*index.*  
+<p><a name="2006-10-03">2006-10-03:</a>
+<hr>
+	<p>Added tolua_callmethod(class_name,method_name,arguments,
+	num_of_returns,returns) macro. It allows to call class method (which can be represented by lua function)
+
+	<p>Example:
+<pre>	------call-method-test.hxx----------
+	class TCLASS{
+	 public:
+	  float delta;
+	  float time;
+	       ....
+	  void make(float period){
+	    tolua_callmethod(TCLASS,handler,
+	      tolua_pushnumber(L,time);
+	      tolua_pushnumber(L,period),
+	      1,
+	      time=tolua_tonumber(L,1)
+	    );
+	  }
+	};
+	------call-method-test.lua----------
+	require"call-method-test"
+	local t=TCLASS()
+	function t:handler(time,period)
+	   time=time+period
+	   self.delta=self.delta+period
+	   return time
+	end
+
+	t:make(10)
+	</pre>
+	
+<p><a name="2006-09-02">2006-09-02:</a>
+<hr>
+<p>Corrected the ${i,l,h,c}file"" bug. Now these methods search files first in preprocessor directory and then in the directory where 
+the preprocessed file is situated.
+<p><a name="2006-09-29">2006-09-29:</a>
+<hr>
+<p>Now indexing operator [] works for strings. The `__{index,newindex}\\.{get,set}s` method is used.
+
+<p>Corrected bug with declaraing variables inside namespaces (Nested namespaces are not supported)
+
+<p><a name="2006-09-28">2006-09-28:</a>
+<hr>
+<p>Added `()` (__call\\.callself) - operator for calling self. (useful for iterators)
+
+<p><a name="2006-09-27">2006-09-27:</a>
+<hr>
+<p>Added unary operators
+<ul>
+<li>`-` (__unm\\.unm) - unary minus ('-' as C++ equivalent)</li>
+<li>`#` (__len\\.len) - length operator ('~' as C++ equivalent)</li>
+</ul>
+<p><a name="2006-09-25">2006-09-25:</a>
+<hr>
+<p>Added  lua5.1 operators :
+<ul><li>`^`  (__pow\\.pow)		- power operation ('^' as C++ equivalent)</li>
+<li>`..` (__concat\\.concat)	- concatenation ('|' as C++ equivalent)</li></ul>
+<hr>
+toluaxx 2006
+
+  </td></tr>
+  <tr><td id=footer></td></tr>
+</table>
+</body>
+  

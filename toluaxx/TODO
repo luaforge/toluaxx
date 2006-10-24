@@ -1,0 +1,12 @@
+
+Full support for all lua5.1 operators:
+  toluaxx have support __concat operator `|` (`|` as a c++ analog),
+  __pow operator `^`, __mod operator `%`, unary minus `-`,
+  __len operator `#` (`~` as a c++ analog), __call operator `()`...
+
+Support operator[] and &operator[] for string index:
+  Modification of the
+    int class_index_event(lua_State* L);
+    int class_newindex_event(lua_State* L);
+  event metamethods.
+  Add sets, gets shadow functions also.

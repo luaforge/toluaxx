@@ -1,0 +1,80 @@
+##                                    ##
+##  Copyright (C) 2006 by PhoeniX IV  ##
+##                                    ##
+##  RareSky Community 2012            ##
+##                                    ##
+##             Platform GNU Makefile  ##
+##                                    ##
+
+##
+## config for GNU/Linux GCC platforms
+##
+
+
+ifndef PREFIX
+  PREFIX=c\:/GNUtools/mingw
+endif
+
+SYMLINK=enable
+
+RUN.NAME=$(NAME)$(VERSION)
+RUN.PATH=bin/$(NAME)$(VERSION)
+
+LIB.NAME=$(NAME)$(VERSION)
+LIB.PATH=lib/$(NAME)$(VERSION)
+
+INC.NAME=$(NAME).h
+INC.PATH=include/$(NAME)$(VERSION)
+
+# Build system options
+CFLAGS.DEBUG=-g -D DEBUG_MODE=1
+CFLAGS.RELEASE=-O3
+
+# Compiler
+CX=g++ -c $(1) -o $(2) $(3)    # Compile only (without linking) .c++ source: 1-sources, 2-object, 3-cflags
+CC=gcc -c $(1) -o $(2) $(3)    # Compile only (without linking) .c   source: 1-sources, 2-object, 3-cflags
+
+C.I=$(addprefix -I,$(1))   # Add include directory
+
+# Static Archiver
+AR=ar r $(2) $(1)              # Make static library: 1-objects, 2-library name, 3-lopts
+AXT=a
+
+# Ranable Linker
+RL=g++ $(1) -o $(2) $(3)
+RXT=exe
+
+# Shader Linker
+SL=g++ -shared $(1) -o $(2) $(3) 
+SXT=dll
+
+L.L=$(addprefix -L,$(1))   # Add library directory
+L.l=$(addprefix -l,$(1))   # Add libs
+#L.n=$(addprefix lib,$(addsuffix .a,$(1))) # Lib name
+L.n=lib$(1)
+
+# Binder
+CB=bin/toluaxx5.1.$(RXT) -o $(2) $(1)
+
+# Utils
+P.PATH=$(subst /,\\,$(1))
+ECHO=echo
+RM=del /q /f $(call P.PATH,$(1))
+MD=mkdir $(call P.PATH,$(1))
+RD=rmdir $(call P.PATH,$(1))
+CP=copy $(call P.PATH,$(1))
+
+# Internal options
+CFLAGS.I+=$(INC.PATH)
+LOPTS.L+=lib
+
+# Lua5.1 options
+CFLAGS.I+=include/lua5.1
+ifneq ($(LUA.I),)
+  CFLAGS.I+=$(LUA.I)
+endif
+ifneq ($(LUA.L),)
+  LOPTS.L+=$(LUA.L)
+endif
+LOPTS.l+=lua5.1
+

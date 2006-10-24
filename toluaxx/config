@@ -1,0 +1,35 @@
+##
+## Copyright (C) 2006 by PhoeniX IV
+##
+
+NAME=toluaxx
+VERSION=5.1
+
+## Install prefix
+## for posix [/usr]
+# PREFIX=
+
+## Debug mode
+## [enable|disable]
+DEBUG=enable
+DEBUG=disable
+
+## Make mode
+## [test|real]
+MODE=real
+#MODE=test
+
+## OS/Platform
+## [linux|win32|....]
+PLATFORM=linux
+## Compiler Collection
+## [gcc|msvs|mingw|....]
+COMPILER=gcc
+
+#PLATFORM=win32
+#COMPILER=msvs
+#PLATFORM=win32
+#COMPILER=mingw
+
+LIB.STATIC=enable
+LIB.SHARED=disable
