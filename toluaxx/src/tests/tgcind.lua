@@ -28,4 +28,11 @@ print("g1.o2=nil",g1.o2)
 collectgarbage"collect"
 print(collectgarbage"count")
 
+g2=TST()
+g2.o1=OBJ()
+print(g2.o1,g2.o2)
+
+
 print("OK")
+
+

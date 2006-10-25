@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.2 2006-10-25 09:45:39 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.3 2006-10-25 16:06:25 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -258,26 +258,6 @@ static int class_newindex_event (lua_State* L){
 static int class_index_event (lua_State* L){ // method with operator[](string)
   int t = lua_type(L,1);
   if (t == LUA_TUSERDATA) {
-    /* Access alternative table */
-#ifdef LUA_VERSION_NUM /* new macro on version 5.1 */
-    lua_getfenv(L,1);
-    if (!lua_rawequal(L, -1, TOLUA_NOPEER)) {
-      lua_pushvalue(L, 2); /* key */
-      lua_gettable(L, -2); /* on lua 5.1, we trade the "tolua_peers" lookup for a gettable call */
-      if (!lua_isnil(L, -1)) return 1;
-    };
-#else
-    lua_pushstring(L,"tolua_peers");
-    lua_rawget(L,LUA_REGISTRYINDEX);         /* stack: obj key ubox */
-    lua_pushvalue(L,1);
-    lua_rawget(L,-2);                        /* stack: obj key ubox ubox[u] */
-    if (lua_istable(L,-1)){
-      lua_pushvalue(L,2); /* key */
-      lua_rawget(L,-2);                      /* stack: obj key ubox ubox[u] value */
-      if (!lua_isnil(L,-1)) return 1;
-    }
-#endif
-    lua_settop(L,2);                         /* stack: obj key */
     lua_pushvalue(L,1);                      /* stack: obj key obj */
     /* Try metatables */
     while (lua_getmetatable(L,-1)) {         /* stack: obj key obj mt */
@@ -348,7 +328,29 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
       }
       lua_settop(L,3);                       /* stack: obj key mt */
     }
-    lua_pushnil(L);                          /* stack: obj key mt nil */
+    lua_settop(L,2);                         /* stack: obj key */
+    /* Access alternative table */
+#ifdef LUA_VERSION_NUM /* new macro on version 5.1 */
+    lua_getfenv(L,1);                        /* stack: obj key ?peer? */
+    if (!lua_rawequal(L, -1, TOLUA_NOPEER)) {/* check if ?peer? is peer */
+      lua_pushvalue(L, 2);                   /* stack: obj key peer key */
+      lua_gettable(L, -2);                   /* stack: obj key val */
+      /* on lua 5.1, we trade the "tolua_peers" lookup for a gettable call */
+      if (!lua_isnil(L, -1)) return 1;       /* stack: val */
+    }
+#else
+    lua_pushstring(L,"tolua_peers");
+    lua_rawget(L,LUA_REGISTRYINDEX);         /* stack: obj key ubox */
+    lua_pushvalue(L,1);
+    lua_rawget(L,-2);                        /* stack: obj key ubox ubox[u] */
+    if (lua_istable(L,-1)){
+      lua_pushvalue(L,2); /* key */
+      lua_rawget(L,-2);                      /* stack: obj key ubox ubox[u] value */
+      if (!lua_isnil(L,-1)) return 1;
+    }
+#endif
+    lua_settop(L,2);                         /* stack: obj key */
+    lua_pushnil(L);                          /* stack: obj key nil */
     return 1;                                /* stack: nil */
   }else if (t==LUA_TTABLE){
     module_index_event(L);

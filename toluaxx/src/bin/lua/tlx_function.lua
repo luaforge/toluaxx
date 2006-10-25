@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_function.lua,v 1.1.1.2 2006-10-25 10:56:02 phoenix11 Exp $
+-- $Id: tlx_function.lua,v 1.2 2006-10-25 16:06:25 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -22,12 +22,12 @@
 --  args  = list of argument declarations
 --  const = if it is a method receiving a const "this".
 classFunction = {
- mod = '',
- type = '',
- ptr = '',
- name = '',
- args = {n=0},
- const = '',
+   mod = '',
+   type = '',
+   ptr = '',
+   name = '',
+   args = {n=0},
+   const = '',
 }
 classFunction.__index = classFunction
 setmetatable(classFunction,classFeature)

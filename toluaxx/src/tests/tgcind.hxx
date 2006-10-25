@@ -29,3 +29,19 @@ public:
 };
 //tolua_end
 
+class TST: public OBJ{//tolua_export
+public:
+  //tolua_begin
+  TST();
+  ~TST();
+  //tolua_end
+  OBJ* get(string);
+  void set(string,OBJ*);
+  //tolua_begin
+  /**
+  //OBJ* tolua_index(string,get); // for read only
+  OBJ* tolua_index(string,get,set);
+  **/
+};
+//tolua_end
+

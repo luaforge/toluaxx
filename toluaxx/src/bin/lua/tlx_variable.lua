@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_variable.lua,v 1.1.1.2 2006-10-25 10:55:54 phoenix11 Exp $
+-- $Id: tlx_variable.lua,v 1.2 2006-10-25 16:06:25 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -129,6 +129,15 @@ function classVariable:checkproperty()
       type = type or "default"
       self.prop_get,self.prop_set = get_property_methods(type, self.name)
       self.mod = string.gsub(self.mod, "tolua_property[^%s]*", "")
+   end
+end
+
+function classVariable:checkindex()
+   if string.find(self.mod, 'tolua_index') then
+      local _,_,type = string.find(self.mod, "tolua_index__([^%s]*)")
+      type = type or "default"
+      self.prop_get,self.prop_set = get_index_methods(type, self.name)
+      self.mod = string.gsub(self.mod, "tolua_index[^%s]*", "")
    end
 end
 
