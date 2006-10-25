@@ -27,8 +27,8 @@ ifdef debug
 DEBUG=$(debug)
 endif
 
--include option/$(PLATFORM)-$(COMPILER).local
-include option/$(PLATFORM)-$(COMPILER)
+-include opt/$(PLATFORM)-$(COMPILER).local
+include opt/$(PLATFORM)-$(COMPILER)
 
 
 PREFIX.bin=bin

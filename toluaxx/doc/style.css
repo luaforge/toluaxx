@@ -12,12 +12,10 @@ h1 { font-size:32px;
 #pagelogo { width:128px; height:128px; }
 
 #pagemenu a:before { content: ".:";
-                    display: block;
                     margin-left: 5px;
                     text-align: right;
                     text-decoration: none; }
 #pagemenu a:after { content: ":.";
-                   display: block;
                    margin-right: 5px;
                    text-align: right;
                    text-decoration: none; }
@@ -26,8 +24,7 @@ h1 { font-size:32px;
 #pagemenu a, a.link, a.active, a.visited{ color:#0d00a0;
                                          text-align:center;
                                          text-decoration:none;
-                                         background-color:transparent;
-                                         width:128px; height:32px; }
+                                         background-color:transparent; }
 #pagemenu a:hover{ color:#ff00a0;
                   text-decoration:none; }
 

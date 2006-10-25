@@ -1,0 +1,110 @@
+##                                    ##
+##  Copyright (C) 2006 by PhoeniX IV  ##
+##                                    ##
+##  RareSky Community 2012            ##
+##                                    ##
+##             Platform GNU Makefile  ##
+##                                    ##
+
+##
+## config for win32 msvc platforms
+##
+
+
+ifndef PREFIX
+  PREFIX=
+endif
+
+ifndef VSPATH
+  VSPATH="C:\Program Files\Microsoft Visual Studio 8"
+endif
+
+ifndef P.STD_INC
+  P.STD_INC=$(VSPATH)"\VC\PlatformSDK\Include"
+endif
+
+ifndef P.STD_LIB
+  P.STD_LIB=$(VSPATH)"\VC\PlatformSDK\Lib"
+endif
+
+ifndef P.VCVARS_BATCH
+  P.VCVARS_BATCH=$(VSPATH)"\VC\bin\vcvars32.bat"
+endif
+
+PKGCONFIG=disable
+SYMLINK=disable
+
+ifndef STDPATHS
+  STDPATHS=enable
+endif
+
+ifndef ENVSETS
+  ENVSETS=enable
+endif
+
+RUN.NAME=$(NAME)$(VERSION)
+RUN.PATH=bin/$(NAME)$(VERSION)
+
+LIB.NAME=$(NAME)$(VERSION)
+LIB.PATH=lib/$(NAME)$(VERSION)
+
+INC.NAME=$(NAME).h
+INC.PATH=include/$(NAME)$(VERSION)
+
+# Build system options
+CFLAGS.DEBUG=/Od /Z7 /D DEBUG_MODE=1
+CFLAGS.RELEASE=/Ox /w
+CFLAGS+=/EHsc /D _WIN32=1
+
+# Compiler
+CX=cl /nologo /c $(1) /Fo$(2) $(3)    # Compile only (without linking) .c++ source: 1-sources, 2-object, 3-cflags
+CC=cl /nologo /c $(1) /Fo$(2) $(3)    # Compile only (without linking) .c   source: 1-sources, 2-object, 3-cflags
+
+C.I=$(addprefix /I ,$(1))   # Add include directory
+
+# Static Archiver
+AR=lib $(1) /OUT:$(2)              # Make static library: 1-objects, 2-library name, 3-lopts
+AXT=lib
+
+# Ranable Linker
+RL=link /NOLOGO $(1) /OUT:$(2) $(3)
+RXT=exe
+
+# Shader Linker
+SL=link /NOLOGO $(1) /dll /OUT:$(2) $(3)
+SXT=dll
+
+L.L=$(addprefix /LIBPATH:,$(1))   # Add library directory
+L.l=$(addsuffix .lib,$(1))
+L.n=$(1)
+
+# Binder
+CB=bin/toluaxx5.1.$(RXT) -o $(2) $(1)
+
+# Utils
+P.PATH=$(subst /,\\,$(1))
+ECHO=echo
+RM=del /q /f $(call P.PATH,$(1))
+MD=mkdir $(call P.PATH,$(1))
+RD=rmdir $(call P.PATH,$(1))
+CP=copy $(call P.PATH,$(1))
+
+# Internal options
+CFLAGS.I+=$(INC.PATH)
+LOPTS.L+=lib
+
+ifeq ($(STDPATHS),enable)
+  CFLAGS+=/I $(P.STD_INC)
+  LOPTS+=/LIBPATH:$(P.STD_LIB)
+endif
+
+# Lua5.1 options
+CFLAGS.I+=include/lua5.1
+LOPTS.l+=lua5.1
+
+# MSVC
+local.prepare:
+ifeq ($(ENVSETS),enable)
+	@$(EXEC) set PATH=$(P.MAKE)$(value ;%PATH%)
+	@$(EXEC) call $(P.VCVARS_BATCH)
+endif

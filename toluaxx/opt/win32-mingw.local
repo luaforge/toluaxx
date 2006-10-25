@@ -1,0 +1,7 @@
+## local settings
+
+#PREFIX=C\:/GNUtools/mingw
+
+LUA.I=path/to/lua5.1/include
+LUA.L=path/to/lua5.1/lib
+
