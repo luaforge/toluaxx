@@ -3,7 +3,7 @@
 ** Written by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: help.cxx,v 1.1 2006-10-24 14:33:37 phoenix11 Exp $
+** $Id: help.cxx,v 1.1.1.2 2006-10-25 10:55:39 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.

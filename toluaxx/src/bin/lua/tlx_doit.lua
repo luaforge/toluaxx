@@ -3,7 +3,7 @@
 -- TeCGraf/PUC-Rio
 -- Jul 1998
 -- Last update: Apr 2003
--- $Id: tlx_doit.lua,v 1.1 2006-10-24 14:33:45 phoenix11 Exp $
+-- $Id: tlx_doit.lua,v 1.1.1.2 2006-10-25 10:56:08 phoenix11 Exp $
 
 
 -- This code is free software; you can redistribute it and/or modify it.
