@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: toluaxx.h,v 1.1 2006-10-24 14:33:54 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.1.1.2 2006-10-25 10:57:17 phoenix11 Exp $
 */
 
 /*
@@ -12,7 +12,7 @@
 ** Modernized by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: toluaxx.h,v 1.1 2006-10-24 14:33:54 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.1.1.2 2006-10-25 10:57:17 phoenix11 Exp $
 **
 */
 

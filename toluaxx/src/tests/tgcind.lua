@@ -10,7 +10,7 @@ print("local o1=OBJ()",o1)
 g1.o1=o1
 print("g1.o1=o1",g1.o1)
 
-g1.o2=OBJ:new()
+g1.o2=OBJ()
 print("g1.o2=OBJ()",g1.o2)
 
 collectgarbage"collect"
@@ -22,7 +22,6 @@ print("g1.o1=nil",g1.o1)
 collectgarbage"collect"
 print(collectgarbage"count")
 
-g1.o2:delete()
 g1.o2=nil
 print("g1.o2=nil",g1.o2)
 

@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.1 2006-10-24 14:33:47 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.1.1.2 2006-10-25 10:56:35 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -21,17 +21,18 @@
  * the pair key/value in the corresponding ubox table
  */
 static void storeatubox (lua_State* L, int lo){
-#ifdef LUA_VERSION_NUM
-  lua_getfenv(L, lo);
-  if (lua_rawequal(L, -1, TOLUA_NOPEER)) {
-    lua_pop(L, 1);
-    lua_newtable(L);
-    lua_pushvalue(L, -1);
-    lua_setfenv(L, lo);	/* stack: k,v,table  */
+#ifdef LUA_VERSION_NUM                     /* stack: obj key val */
+  lua_getfenv(L, lo);                      /* stack: obj key val ?peer? */
+  if (lua_rawequal(L, -1, TOLUA_NOPEER)) { /* check if ?peer? is no peer really */ /* create peer table */
+    lua_pop(L, 1);                         /* stack: obj key val */
+    lua_newtable(L);                       /* stack: obj key val peer */
+    lua_pushvalue(L, -1);                  /* stack: obj key val peer peer */
+    lua_setfenv(L, lo);	                   /* stack: obj key val peer */
   }
-  lua_insert(L, -3);
-  lua_settable(L, -3); /* on lua 5.1, we trade the "tolua_peers" lookup for a settable call */
-  lua_pop(L, 1);
+  lua_insert(L, -3);                       /* stack: obj peer key val */
+  lua_settable(L, -3);                     /* stack: obj peer */
+  lua_pop(L, 1);                           /* stack: obj */
+  /* on lua 5.1, we trade the "tolua_peers" lookup for a settable call */
 #else
   /* stack: key value (to be stored) */
   lua_pushstring(L,"tolua_peers");
@@ -377,6 +378,10 @@ static int class_newindex_event (lua_State* L){
 	  lua_pushvalue(L,2);                /* stack: obj key val mt func obj key */
 	  lua_pushvalue(L,3);                /* stack: obj key val mt func obj key val */
 	  lua_call(L,3,0);                   /* stack: obj key val mt */
+	  lua_settop(L,3);                   /* stack: obj key val */
+	  if (lua_isuserdata(L,-1) || lua_isnil(L,-1)) {        /* check if val is userdata or nil */ /* therefor garbage collector not collect userdata store it into peer */
+	    storeatubox(L,1);                /* stack: obj */
+	  }
 	  return 0;                          /* stack: no value */
 	}
 	lua_pop(L,1);                        /* stack: obj key val mt */
@@ -407,7 +412,7 @@ static int class_newindex_event (lua_State* L){
     if (lua_isstring(L,2)) {                 /* check if key is a string value */
       /* try operator[](string) */
       lua_getmetatable(L,1);                 /* stack: obj key val mt */
-      while (lua_istable(L,-1)) {            /* check if mt if table */
+      while (lua_istable(L,-1)) {            /* check if mt is table */
 	lua_pushstring(L,".sets");           /* stack: obj key val mt ".sets" */
 	lua_rawget(L,-2);                    /* stack: obj key val mt ?func? */
 	if (lua_isfunction(L,-1)) {          /* check if ?func? is a function */
@@ -415,6 +420,10 @@ static int class_newindex_event (lua_State* L){
 	  lua_pushvalue(L,2);                /* stack: obj key val mt func obj key */
 	  lua_pushvalue(L,3);                /* stack: obj key val mt func obj key val */
 	  lua_call(L,3,0);                   /* stack: obj key val mt */
+	  lua_settop(L,3);                   /* stack: obj key val */
+	  if (lua_isuserdata(L,-1) || lua_isnil(L,-1)) {        /* check if val is userdata or nil */ /* therefor garbage collector not collect userdata store it into peer */
+	    storeatubox(L,1);                /* stack: obj */
+	  }
 	  return 0;                          /* stack: no value */
 	}
 	if (!lua_getmetatable(L,-1))         /* stack: obj key val mt ?next_mt? */
