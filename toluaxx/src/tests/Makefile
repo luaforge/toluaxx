@@ -4,6 +4,7 @@ MTARGET = $(patsubst t%.lua,m%.so,$(PACKAGE))
 TTARGET = $(patsubst t%.lua,test.%,$(PACKAGE))
 TARGET  = test
 
+PRERUN=LD_LIBRARY_PATH=../../lib
 COPTS += -g -D DEBUG_MODE=1
 
 BOPTS += -n $(patsubst t%.pkg,m%,$^)
@@ -11,8 +12,8 @@ LOPTS += --shared `pkg-config --libs lua5.1` -L../../lib -ltoluaxx5.1
 COPTS += `pkg-config --cflags lua5.1` -I../../include/toluaxx5.1
 
 ECHO=echo
-VME=lua5.1
-CB=../../bin/toluaxx5.1.run
+VME=$(PRERUN) lua5.1
+CB=$(PRERUN) ../../bin/toluaxx5.1.run
 CX=g++ -c
 RM=rm -f
 

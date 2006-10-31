@@ -1,24 +1,45 @@
 This version of toluaxx uses GNU Make to compile (http://www.gnu.org/software/make/make.html).
 (windows version make.exe can be find http://mingw.org/download.shtml)
 
-* Installation
 
-  1. Specify options into the 'config' file for your platform to suit your
+* Building
+
+  1. Specify options into the `config` file for your platform to suit your
      environment, if at all necessary.
      
-     Check config file before: config.$(PLATFORM)-$(COMPILER)
+     Check config file before: opt/$(PLATFORM)-$(COMPILER)
      
      PLATFORM=your OS platform
      COMPILER=your compiler
      
-     For example, config.linux_gcc:
+     For example, opt/linux_gcc:
      
      PLATFORM=linux
      COMPILER=gcc
      
+     
   2. Then, type 'make'.
+     
+     You may specify `platform` and `compiler` variables with make, as example:
+     
+     $ make all platform=linux compiler=gcc
+     
+
+* Installation
+
+     For installation you can type `make install`. Check variable `PREFIX` in `config` before.
   
-  3. For installation type 'make install'.
+     You also may specify `prefix` variables with make, as example:
+     
+     $ make install prefix=/usr
+
+
+* Uninstallation
+
+    For installation you can type `make uninstall`.
+
+    If you use `prefix` when install, you can also uninstall with this prefix.
+    
 
 * What you get
 
@@ -29,23 +50,3 @@ This version of toluaxx uses GNU Make to compile (http://www.gnu.org/software/ma
   These are the only directories you need for development, besides Lua.
 
   You can use 'make install' to install the files, see the 'prefix' option.
-
-* Installation without scons
-
-  The instructions for building tolua++ without scons depend on the particular
-  compiler you are using.
-  The simplest way is to create a folder with all .c and .h files except
-  'toluabind_default.c', and then create a project for the executable and the
-  library, as follows:
-
-  tolua.exe: all *.c *.h in src/bin (except toluabind_default.c)
-  tolua.lib: all *.c *.h in src/lib.
-
-* Installation with Microsoft Visual Studio
-
-  The directory 'win32' contains project files for Microsoft Visual Studio 7
-  (contributed by Makoto Hamanaka). The project has 4 different build options:
-  withLua50_Release, withLua51_Release, withLua50_Debug and withLua51_Debug.
-  They all expect the lua library names used by the LuaBinaries packages
-  (http://luabinaries.luaforge.net/). The resulting files are built on /lib and
-  /bin (for the library and tolua++.exe).

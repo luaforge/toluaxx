@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.3 2006-10-25 16:06:25 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.4 2006-10-31 14:26:53 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -322,8 +322,13 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
 	if (lua_isfunction(L,-1)) {          /* check if func is function? */
 	  lua_pushvalue(L,1);                /* stack: obj key mt func obj */
 	  lua_pushvalue(L,2);                /* stack: obj key mt func obj key */
-	  lua_call(L,2,1);                   /* stack: obj key mt ret */
-	  return 1;                          /* stack: ret */
+	  /*--lua_call(L,2,1);*/             /* stack: obj key mt ret--*/
+	  lua_call(L,2,1);                   /* stack: obj key mt ?ret? */
+	  if(lua_isnil(L,-1)){               /* check if .gets not passed */
+	                                     /* stack: obj key mt nil */
+	  }else{                             /* stack: obj key mt ret novalue */
+	    return 1;                        /* stack: ret */
+	  }
 	}
       }
       lua_settop(L,3);                       /* stack: obj key mt */
@@ -343,7 +348,7 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
     lua_rawget(L,LUA_REGISTRYINDEX);         /* stack: obj key ubox */
     lua_pushvalue(L,1);
     lua_rawget(L,-2);                        /* stack: obj key ubox ubox[u] */
-    if (lua_istable(L,-1)){
+    if (lua_istable(L,-1)) {
       lua_pushvalue(L,2); /* key */
       lua_rawget(L,-2);                      /* stack: obj key ubox ubox[u] value */
       if (!lua_isnil(L,-1)) return 1;
@@ -352,7 +357,7 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
     lua_settop(L,2);                         /* stack: obj key */
     lua_pushnil(L);                          /* stack: obj key nil */
     return 1;                                /* stack: nil */
-  }else if (t==LUA_TTABLE){
+  }else if (t == LUA_TTABLE) {
     module_index_event(L);
     return 1;
   }
@@ -421,12 +426,22 @@ static int class_newindex_event (lua_State* L){
 	  lua_pushvalue(L,1);                /* stack: obj key val mt func obj */
 	  lua_pushvalue(L,2);                /* stack: obj key val mt func obj key */
 	  lua_pushvalue(L,3);                /* stack: obj key val mt func obj key val */
-	  lua_call(L,3,0);                   /* stack: obj key val mt */
-	  lua_settop(L,3);                   /* stack: obj key val */
-	  if (lua_isuserdata(L,-1) || lua_isnil(L,-1)) {        /* check if val is userdata or nil */ /* therefor garbage collector not collect userdata store it into peer */
-	    storeatubox(L,1);                /* stack: obj */
+	  /*--lua_call(L,3,0);--*/           /*-- stack: obj key val mt --*/
+	  int t=lua_gettop(L)-1;
+	  lua_call(L,3,3);                   /* stack: obj key val mt <?obj? ?key? ?val?> */
+	  if (lua_isuserdata(L,t-2) &&
+	      lua_isstring(L,t-1)) {         /* check if .sets not passed */
+	                                     /* stack: obj key val mt obj key val */
+	    lua_remove(L,-1);                /* stack: obj key val mt obj key */
+	    lua_remove(L,-1);                /* stack: obj key val mt obj */
+	    lua_remove(L,-1);                /* stack: obj key val mt */
+	  }else{
+	    lua_settop(L,3);                 /* stack: obj key val */
+	    if (lua_isuserdata(L,-1) || lua_isnil(L,-1)) {        /* check if val is userdata or nil */ /* therefor garbage collector not collect userdata store it into peer */
+	      storeatubox(L,1);              /* stack: obj */
+	    }
+	    return 0;                        /* stack: no value */
 	  }
-	  return 0;                          /* stack: no value */
 	}
 	if (!lua_getmetatable(L,-1))         /* stack: obj key val mt ?next_mt? */
 	  lua_pushnil(L);                    /* stack: obj key val mt nil */
@@ -436,7 +451,7 @@ static int class_newindex_event (lua_State* L){
     lua_settop(L,3);                         /* stack: obj key val */
     /* then, store as a new field */
     storeatubox(L,1);
-  } else if (t== LUA_TTABLE) {
+  } else if (t==LUA_TTABLE) {
     module_newindex_event(L);
   }
   return 0;

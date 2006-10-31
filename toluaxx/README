@@ -22,7 +22,7 @@ This is toluaxx-1.1.0
   toLua++ can be downloaded from the sites below:
             http://www.codenix.com/~tolua/
   toLuaxx can be downloaded from the sites below:
-            http://luaforge.net/toluaxx/
+            http://toluaxx.luaforge.net/
 
 * Installation
   See INSTALL.
@@ -30,7 +30,7 @@ This is toluaxx-1.1.0
 * Contacting the author
   toLua has been designed and implemented by Waldemar Celes.
   toLua++ is maintained by Ariel Manzur.
-  toLuaxx is modified and maintained by Phoenix IV.
+  toLuaxx is modified and maintained by V. Phoenix (phoenix11)  and K. Kirik (snegovick).
   
   Send your comments, bug reports and anything else to 
-  toluaxx@luaforge.com
+  toluaxx-commit@luaforge.com

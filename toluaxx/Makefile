@@ -26,6 +26,9 @@ endif
 ifdef debug
 DEBUG=$(debug)
 endif
+ifdef prefix
+PREFIX=$(prefix)
+endif
 
 -include opt/$(PLATFORM)-$(COMPILER).local
 include opt/$(PLATFORM)-$(COMPILER)

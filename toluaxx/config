@@ -12,7 +12,7 @@ VERSION=5.1
 ## Debug mode
 ## [enable|disable]
 DEBUG=enable
-#DEBUG=disable
+DEBUG=disable
 
 ## Make mode
 ## [test|real]
@@ -33,3 +33,4 @@ COMPILER=gcc
 
 LIB.STATIC=enable
 LIB.SHARED=disable
+LIB.SHARED=enable

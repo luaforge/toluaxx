@@ -1,1 +1,10 @@
 Platform and compiler related build configs....
+
+Available next configurations:
+
+1. linux-gcc
+2. linux-mingw
+3. win32-mingw
+4. win32-msvc
+
+Another configs write by itself.

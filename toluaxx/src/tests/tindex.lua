@@ -52,9 +52,15 @@ sm.one=e1
 sm.two=e2
 sm.three=e1
 
+assert(#sm==3)
+
 assert(sm.null==nil)
 assert(sm.one==sm.three)
 assert(sm.one~=sm.two)
+
+print("Test set/get with peer")
+sm.num=3
+assert(sm.num==3)
 
 for i,o in sm do print("Entre:",i,o) end
 print(sm,#sm)

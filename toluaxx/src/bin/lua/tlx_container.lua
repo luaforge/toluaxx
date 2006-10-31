@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_container.lua,v 1.2 2006-10-25 16:06:25 phoenix11 Exp $
+-- $Id: tlx_container.lua,v 1.3 2006-10-31 14:26:53 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -16,8 +16,7 @@ global_enums = {}
 -- Container class
 -- Represents a container of features to be bound
 -- to lua.
-classContainer =
-   {
+classContainer = {
    curr = nil,
 }
 classContainer.__index = classContainer
@@ -641,6 +640,8 @@ function classContainer:doparse (s)
 	       local fd = gsub(decl,"tolua_index",t[2])     
 	       local f = Function(fd," "..fa.." ",const)
 	       f.lname=fn
+	       f.last_overload_error=false
+	       f.last_overload_rmfun=true
 	    end
 	    if t[3] then
 	       local fn = ".set"..itype
@@ -648,11 +649,14 @@ function classContainer:doparse (s)
 	       local fd = gsub(decl,"tolua_index",t[3])
 	       local fdd = Declaration(fd,'func')
 	       --print(fdd.type,fdd.ptr)
-	       fd = gsub(fd,fdd.type,"void")
-	       fd = gsub(fd,fdd.ptr,"")
+	       --fd = gsub(fd,fdd.type,"void")
+	       --fd = gsub(fd,fdd.ptr,"")
 	       
 	       local f = Function(fd," "..fa.." , "..fdd.type..fdd.ptr.." ",const)
 	       f.lname=fn
+	       f.type="void"
+	       f.last_overload_error=false
+	       f.last_overload_rmfun=true
 	    end
 	    return strsub(s,e+1)
 	 end

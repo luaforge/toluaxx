@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_function.lua,v 1.2 2006-10-25 16:06:25 phoenix11 Exp $
+-- $Id: tlx_function.lua,v 1.3 2006-10-31 14:26:53 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -28,6 +28,8 @@ classFunction = {
    name = '',
    args = {n=0},
    const = '',
+   last_overload_error = true,
+   last_overload_rmfun = false
 }
 classFunction.__index = classFunction
 setmetatable(classFunction,classFeature)
@@ -80,7 +82,7 @@ function classFunction:supcode (local_constructor)
    
    -- check types
    if overload < 0 then
-      output('#ifndef TOLUA_RELEASE\n')
+      --output('#ifndef TOLUA_RELEASE\n')
    end
    output(' tolua_Error tolua_err;')
    output(' if (\n')
@@ -119,7 +121,7 @@ function classFunction:supcode (local_constructor)
    
    output(' else\n')
    if overload < 0 then
-      output('#endif\n')
+      --output('#endif\n')
    end
    output(' {')
    
@@ -147,9 +149,9 @@ function classFunction:supcode (local_constructor)
    
    -- check self
    if class and self.name~='new' and static==nil then
-      output('#ifndef TOLUA_RELEASE\n')
+      --output('#ifndef TOLUA_RELEASE\n')
       output('  if (!self) tolua_error(tolua_S,"invalid \'self\' in function \''..self.name..'\'",NULL);');
-      output('#endif\n')
+      --output('#endif\n')
    end
    
    -- get array element values
@@ -292,18 +294,30 @@ function classFunction:supcode (local_constructor)
 
    -- call overloaded function or generate error
    if overload < 0 then
-      output('#ifndef TOLUA_RELEASE\n')
-      output('tolua_lerror:\n')
-      output(' tolua_error(tolua_S,"#ferror in function \''..self.lname..'\'.",&tolua_err);')
-      output(' return 0;')
-      output('#endif\n')
+      if self.last_overload_error then
+	 --output('#ifndef TOLUA_RELEASE\n')
+	 output('tolua_lerror:\n')
+	 output('  tolua_error(tolua_S,"#ferror in function \''..self.lname..'\'.",&tolua_err);')
+	 output('  return 0;')
+	 --output('#endif\n')
+      else
+	 --output('#ifndef TOLUA_RELEASE\n')
+	 output('tolua_lerror:\n')
+	 --if self.last_overload_rmfun then
+	 --   output('  lua_remove(tolua_S,2);\n')
+	 --   output('  return '..tostring(narg-1)..';')
+	 --else
+	 output('  return '..tostring(narg-1)..';\n')
+	 --end
+	 --output('#endif\n')
+      end
    else
       local _local = ""
       if local_constructor then
 	 _local = "_local"
       end
       output('tolua_lerror:\n')
-      output(' return '..strsub(self.cname,1,-3)..format("%02d",overload).._local..'(tolua_S);')
+      output('  return '..strsub(self.cname,1,-3)..format("%02d",overload).._local..'(tolua_S);')
    end
    output('}')
    output('#endif //#ifndef TOLUA_DISABLE\n')
