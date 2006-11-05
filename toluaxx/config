@@ -28,7 +28,6 @@ COMPILER=gcc
 
 #PLATFORM=win32
 #COMPILER=msvs
-#PLATFORM=win32
 #COMPILER=mingw
 
 LIB.STATIC=enable

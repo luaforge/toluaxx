@@ -260,7 +260,10 @@ $(foreach cortege,$(TARGET.MODS),$(eval $(call TARGET.TEMPLATE,$(cortege))))
 .PHONY: prepare.% build.% clean.% probe.%
 .PHONY: prepare   build   clean   probe   all   local.prepare
 
-prepare: local.prepare $(TARGET.prepare)
+global.prepare:
+	@$(ECHO) Preparing build for PLATFOMR=$(PLATFORM) COMPILER=$(COMPILER)....
+
+prepare: global.prepare local.prepare $(TARGET.prepare)
 
 build: $(TARGET.build)
 	@$(ECHO) Build all complete....

@@ -1,3 +1,6 @@
 ## local settings
 
 #PREFIX=/usr
+
+EXTLIB.PATH = /home/fenix/devel/mingw/lib
+

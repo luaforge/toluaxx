@@ -15,13 +15,15 @@ ifndef PREFIX
   PREFIX=c\:/GNUtools/mingw
 endif
 
-SYMLINK=enable
+SYMLINK=disable
 
-RUN.NAME=$(NAME)$(VERSION)
-RUN.PATH=bin/$(NAME)$(VERSION)
+NVERSION=$(subst .,,$(VERSION))
 
-LIB.NAME=$(NAME)$(VERSION)
-LIB.PATH=lib/$(NAME)$(VERSION)
+RUN.NAME=$(NAME)$(NVERSION)
+RUN.PATH=bin/$(NAME)$(NVERSION)
+
+LIB.NAME=$(NAME)$(NVERSION)
+LIB.PATH=lib/$(NAME)$(NVERSION)
 
 INC.NAME=$(NAME).h
 INC.PATH=include/$(NAME)$(VERSION)
@@ -50,11 +52,10 @@ SXT=dll
 
 L.L=$(addprefix -L,$(1))   # Add library directory
 L.l=$(addprefix -l,$(1))   # Add libs
-#L.n=$(addprefix lib,$(addsuffix .a,$(1))) # Lib name
-L.n=lib$(1)
+L.n=$(1)
 
 # Binder
-CB=bin/toluaxx5.1.$(RXT) -o $(2) $(1)
+CB=bin/toluaxx51.$(RXT) -o $(2) $(1)
 
 # Utils
 P.PATH=$(subst /,\\,$(1))
