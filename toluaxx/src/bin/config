@@ -20,6 +20,8 @@ bin.libs=$(LIB.NAME)
 
 ifeq ($(DEBUG),disable)
   BIND=enable
+else
+bin.postpare: src/bin/toluaxx.bind.cxx
 endif
 
 ifeq ($(SYMLINK),enable)

@@ -178,10 +178,14 @@ uninstall.inc.$(1):
 	@$(EXEC) $$(call RM,$(PREFIX)/$$($(1).path)/$$($(1).name))
       $(1).uninstall+=uninstall.inc.$(1)
     endif
-prepare.$(1): $$($(1).dir) $$($(1).modep)
+.PHONY: $(1).prepare $(1).postpare
+prepare.$(1): $(1).prepare $$($(1).dir) $$($(1).modep)
 	@$(ECHO) Prepare module $(1)....
     TARGET.prepare+=prepare.$(1)
-build.$(1): prepare.$(1) $$($(1).target) # Build all targets for module
+postpare.$(1): $(1).postpare
+	@$(ECHO) Postpare module $(1)....
+    TARGET.postpare+=postpare.$(1)
+build.$(1): prepare.$(1) $$($(1).target) postpare.$(1) # Build all targets for module
 	@$(ECHO) Build $(1) complete....
     TARGET.build+=build.$(1)
 clean.$(1):                              # Clean last build module
