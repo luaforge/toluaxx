@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_container.lua,v 1.3 2006-10-31 14:26:53 phoenix11 Exp $
+-- $Id: tlx_container.lua,v 1.4 2006-11-09 21:22:02 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -527,7 +527,7 @@ function classContainer:doparse (s)
       end
    end
 
-   -- try namesapce
+   -- try namespace
    do
       local b,e,name,body = strfind(s,"^%s*namespace%s%s*([_%w][_%w]*)%s*(%b{})%s*;?")
       if b then
@@ -579,10 +579,14 @@ function classContainer:doparse (s)
 
    -- try operator
    do
-      local b,e,decl,kind,arg,const = strfind(s,"^%s*([_%w][_%w%s%*&:<>,]-%s+operator)%s*([^%s][^%s]*)%s*(%b())%s*(c?o?n?s?t?)%s*;%s*")
+      --local pat="^%s*([_%w][_%w%s%*&:<>,]-%s+operator)%s*([^%s][^%s]*)%s*(%b())%s*(c?o?n?s?t?)%s*;%s*"
+      local pat="^%s*([_%w][_%w%s%*&:<>,]-%s+operator)%s*([^%s][^%s]*)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*[%w%_%\"%\"%'%']*%s*[%w%_]*)%s*;%s*"
+      local b,e,decl,kind,arg,const,ret = strfind(s,pat)
       if not b then
 	 -- try inline
-	 b,e,decl,kind,arg,const = strfind(s,"^%s*([_%w][_%w%s%*&:<>,]-%s+operator)%s*([^%s][^%s]*)%s*(%b())%s*(c?o?n?s?t?)[%s\n]*%b{}%s*;?%s*")
+	 --local pat="^%s*([_%w][_%w%s%*&:<>,]-%s+operator)%s*([^%s][^%s]*)%s*(%b())%s*(c?o?n?s?t?)[%s\n]*%b{}%s*;?%s*"
+	 local pat="^%s*([_%w][_%w%s%*&:<>,]-%s+operator)%s*([^%s][^%s]*)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*[%w%_%\"%\"%'%']*%s*[%w%_]*)[%s\n]*%b{}%s*;?%s*"
+	 b,e,decl,kind,arg,const,ret = strfind(s,pat)
       end
       if not b then
 	 -- try cast operator
@@ -596,108 +600,103 @@ function classContainer:doparse (s)
       end
       if b then
 	 _curr_code = strsub(s,b,e)
-	 Operator(decl,kind,arg,const)
+	 Operator(decl,kind,arg,const,ret)
 	 return strsub(s,e+1)
       end
    end
 
-   -- try tolua_index
+   -- try tolua_{get,set}index
    do
-      local b,e,decl,arg,const,virt = strfind(s,"^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*0?)%s*;%s*")
-      if not b then
-	 -- try function with template
-	 b,e,decl,arg,const = strfind(s,"^%s*([~_%w][_@%w%s%*&:<>]*[_%w]%b<>)%s*(%b())%s*(c?o?n?s?t?)%s*=?%s*0?%s*;%s*")
-      end
-      if not b then
-	 -- try a single letter function name
-	 b,e,decl,arg,const = strfind(s,"^%s*([_%w])%s*(%b())%s*(c?o?n?s?t?)%s*;%s*")
-      end
+      local pat="^%s*tolua_getindex%s%s*(%b{})%s*;?"
+      local b,e,body = strfind(s,pat)
       if b then
-	 if virt and string.find(virt, "[=0]") then
-	    if self.flags then
-	       self.flags.pure_virtual = true
-	    end
-	 end
+	 body=strsub(body,2,-2)
 	 _curr_code = strsub(s,b,e)
-	 local n = strfind(decl,"tolua_index")
-	 if n then
-	    local i = 1
-	    local l = {n=0}
-	    local a = arg
-	    
-	    a = string.gsub(a, "%s*([%(%)])%s*", "%1")
-	    local t,strip,last = strip_pars(strsub(a,2,-2))
-	    local itype = ""
-	    if     strfind(t[1],"char*") or strfind(t[1],"string") then
-	       itype = "s"
-	    elseif strfind(t[1],"int")   or strfind(t[1],"float") then
-	       itype = "i"
-	    end
-	    _curr_code = strsub(s,b,e)
-	    if t[2] then
-	       local fn = ".get"..itype
-	       local fa = t[1]
-	       local fd = gsub(decl,"tolua_index",t[2])     
-	       local f = Function(fd," "..fa.." ",const)
-	       f.lname=fn
-	       f.last_overload_error=false
-	       f.last_overload_rmfun=true
-	    end
-	    if t[3] then
-	       local fn = ".set"..itype
-	       local fa = t[1]
-	       local fd = gsub(decl,"tolua_index",t[3])
-	       local fdd = Declaration(fd,'func')
-	       --print(fdd.type,fdd.ptr)
-	       --fd = gsub(fd,fdd.type,"void")
-	       --fd = gsub(fd,fdd.ptr,"")
-	       
-	       local f = Function(fd," "..fa.." , "..fdd.type..fdd.ptr.." ",const)
-	       f.lname=fn
-	       f.type="void"
-	       f.last_overload_error=false
-	       f.last_overload_rmfun=true
-	    end
-	    return strsub(s,e+1)
+	 self.tolua_getindex=true
+	 while body~="" do
+	    body=self:doparse(body)
 	 end
+	 self.tolua_getindex=false
+	 return strsub(s,e+1)
       end
-   end      
-
+      local pat="^%s*tolua_setindex%s%s*(%b{})%s*;?"
+      local b,e,body = strfind(s,pat)
+      if b then
+	 body=strsub(body,2,-2)
+	 _curr_code = strsub(s,b,e)
+	 self.tolua_setindex=true
+	 while body~="" do
+	    body=self:doparse(body)
+	 end
+	 self.tolua_setindex=false
+	 return strsub(s,e+1)
+      end
+   end
+   
    -- try function
    do
-      --local b,e,decl,arg,const = strfind(s,"^%s*([~_%w][_@%w%s%*&:<>]*[_%w])%s*(%b())%s*(c?o?n?s?t?)%s*=?%s*0?%s*;%s*")
-      local b,e,decl,arg,const,virt = strfind(s,"^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*0?)%s*;%s*")
+      --local b,e,decl,arg,const = strfind(s,"^%s*([~_%w][_@%w%s%*&:<>]*[_%w])%s*(%b())%s*(c?o?n?s?t?)%s*=?%s*[%w_%\"%\"%'%']*%s*[%w_%\"%\"%'%']*%s*;%s*")
+      --local pat="^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*0?)%s*;%s*"
+      local pat="^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*[%w%_%\"%\"%'%']*%s*[%w%_]*)%s*;%s*"
+      local b,e,decl,arg,const,ret = strfind(s,pat)
       if not b then
 	 -- try function with template
-	 b,e,decl,arg,const = strfind(s,"^%s*([~_%w][_@%w%s%*&:<>]*[_%w]%b<>)%s*(%b())%s*(c?o?n?s?t?)%s*=?%s*0?%s*;%s*")
+	 local pat="^%s*([~_%w][_@%w%s%*&:<>]*[_%w]%b<>)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*[%w%_%\"%\"%'%']*%s*[%w%_]*)%s*;%s*"
+	 b,e,decl,arg,const,ret = strfind(s,pat)
       end
       if not b then
 	 -- try a single letter function name
 	 b,e,decl,arg,const = strfind(s,"^%s*([_%w])%s*(%b())%s*(c?o?n?s?t?)%s*;%s*")
       end
       if b then
-	 if virt and string.find(virt, "[=0]") then
+	 if ret and string.find(ret, "[=0]") then
 	    if self.flags then
-	       self.flags.pure_virtual = true
+	       --self.flags.pure_virtual = true
 	    end
 	 end
 	 _curr_code = strsub(s,b,e)
-	 Function(decl,arg,const)
+	 local f=Function(decl,arg,const,ret)
+	 local index_func=""
+	 if self.tolua_getindex or self.tolua_setindex then
+	    if f.args.n>0 then
+	       local t=f.args[1].type
+	       local p=f.args[1].ptr
+	       if t=="int" or t=="long" or t=="float" or t=="double" then
+		  index_func="i"
+	       end
+	       if t=="string" or t=="cppstring" or t=="char" and p=="*" then
+		  index_func="s"
+	       end
+	    end
+	 end
+	 if self.tolua_getindex then
+	    f.lname=".get"..index_func
+	    f.try_overload_nil=true
+	    f.last_overload_error=false
+	    f.cname=f:cfuncname("tolua")..f:overload(t)
+	 end
+	 if self.tolua_setindex then
+	    f.lname=".set"..index_func
+	    f.last_overload_error=false
+	    f.cname=f:cfuncname("tolua")..f:overload(t)
+	 end
 	 return strsub(s,e+1)
       end
    end
 
    -- try inline function
    do
-      local b,e,decl,arg,const = strfind(s,"^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)[^;{]*%b{}%s*;?%s*")
+      --local pat="^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)[^;{]*%b{}%s*;?%s*"
+      local pat="^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*[%w%_%\"%\"%'%']*%s*[%w%_]*)[^;{]*%b{}%s*;?%s*"
+      local b,e,decl,arg,const,ret = strfind(s,pat)
       --local b,e,decl,arg,const = strfind(s,"^%s*([~_%w][_@%w%s%*&:<>]*[_%w>])%s*(%b())%s*(c?o?n?s?t?)[^;]*%b{}%s*;?%s*")
       if not b then
 	 -- try a single letter function name
-	 b,e,decl,arg,const = strfind(s,"^%s*([_%w])%s*(%b())%s*(c?o?n?s?t?).-%b{}%s*;?%s*")
+	 b,e,decl,arg,const,ret = strfind(s,"^%s*([%_%w])%s*(%b())%s*(c?o?n?s?t?).-%b{}%s*;?%s*")
       end
       if b then
 	 _curr_code = strsub(s,b,e)
-	 Function(decl,arg,const)
+	 Function(decl,arg,const,ret)
 	 return strsub(s,e+1)
       end
    end

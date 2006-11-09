@@ -126,4 +126,8 @@ assert(handler_called==true,"handler not called!")
 assert(o.time==oldtime+10)
 assert(o()==nil)
 
+assert(get_number(4)==4)
+assert(get_number(0)==nil)
+assert(get_number()==nil)
+
 print("Function test OK")

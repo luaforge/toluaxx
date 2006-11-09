@@ -1,16 +1,1 @@
-
-$#include "tmodule.hxx"
-
-module A {
-  extern int a;
-  module B {
-    extern int b;
-    module C {
-      extern int c;
-    }
-  }
-}
-
-module A {
-  extern int d;
-}
+$hfile"tmodule.hxx"

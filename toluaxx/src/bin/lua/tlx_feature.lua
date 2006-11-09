@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_feature.lua,v 1.1.1.2 2006-10-25 10:55:47 phoenix11 Exp $
+-- $Id: tlx_feature.lua,v 1.2 2006-11-09 21:22:02 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -116,13 +116,11 @@ end
 -- return C binding function name based on name
 -- the client specifies a prefix
 function classFeature:cfuncname (n)
-
- if self.parent then
-  n = self.parent:cfuncname(n)
- end
-
-  n = string.gsub(n..'_'.. (self.lname or self.name), "[<>:, \.%*&]", "_")
-
-  return n
+   if self.parent then
+      n = self.parent:cfuncname(n)
+   end
+   n = string.gsub(n..'_'.. (self.lname or self.name), "[<>:, \.%*&]", "_")
+   
+   return n
 end
 

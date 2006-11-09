@@ -69,16 +69,3 @@ int GRP::operator~(){
   return c;
 }
 
-TST::TST(){}
-TST::~TST(){}
-
-OBJ* TST::get(string k){
-  LOGOUT(TST::get,k);
-  return NULL;
-}
-
-void TST::set(string k,OBJ* v){
-  LOGOUT(TST::set,k<<v);
-}
-
-

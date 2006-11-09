@@ -75,3 +75,28 @@ print(collectgarbage("count"))
 
 print("Index string test OK")
 
+
+g2=TST()
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o1=OBJ()
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o2="Hello"
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o3=ELEM()
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o4=14
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o1=nil
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o2=nil
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o3=nil
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+g2.o4=nil
+print(g2.o1,g2.o2,g2.o3,g2.o4)
+
+print("MultiType indexing test OK")
+
+print("All index tests passed....")
+
+

@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_operator.lua,v 1.2 2006-10-31 14:26:53 phoenix11 Exp $
+-- $Id: tlx_operator.lua,v 1.3 2006-11-09 21:22:02 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -171,7 +171,9 @@ function _Operator (t)
 end
 
 -- Constructor
-function Operator (d,k,a,c)
+function Operator (d,k,a,c,r)
+   r=r or ""
+
    local op_k = string.gsub(k, "^%s*", "")
    op_k = string.gsub(k, "%s*$", "")
    --if string.find(k, "^[%w_:%d<>%*%&]+$") then
@@ -221,6 +223,7 @@ function Operator (d,k,a,c)
    -- ++ >>
    f.args = l
    f.const = c
+   f.rets = Declaration(f.type..r,'var',true)
    f.kind = op_k
    -- --f.lname = "."..(_TM0[f.kind] or f.kind)
    -- ++ <<
@@ -252,6 +255,7 @@ function Operator (d,k,a,c)
    if f.kind == '[]' and ref=='&' and f.const~='const' then
       Operator(d,'&'..k,a,c) 	-- create correspoding set operator
    end
+   
    return _Operator(f)
 end
 

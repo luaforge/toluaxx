@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_function.lua,v 1.3 2006-10-31 14:26:53 phoenix11 Exp $
+-- $Id: tlx_function.lua,v 1.4 2006-11-09 21:22:02 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -232,12 +232,24 @@ function classFunction:supcode (local_constructor)
 	 nret = nret + 1
 	 local t,ct = isbasic(self.type)
 	 if t then
+	    if self.rets.dnil then
+	       output('   if(tolua_ret=='..self.rets.def..')   ')
+	       if self.try_overload_nil and overload >= 0 then
+		  output('goto tolua_lerror;')
+	       else
+		  output('tolua_pushnil(tolua_S);')
+	       end
+	       output('   else')
+	    end
 	    if self.cast_operator and _basic_raw_push[t] then
 	       output('   ',_basic_raw_push[t],'(tolua_S,(',ct,')tolua_ret);')
 	    else
 	       output('   tolua_push'..t..'(tolua_S,(',ct,')tolua_ret);')
 	    end
 	 else
+	    if self.try_overload_nil and overload >= 0 then
+	       output('   if(tolua_ret==NULL)   goto tolua_lerror;')
+	    end
 	    t = self.type
 	    new_t = string.gsub(t, "const%s+", "")
 	    if self.ptr == '' then
@@ -365,7 +377,9 @@ function classFunction:print (ident,close)
       self.args[i]:print(ident.."  ",",")
       i = i+1
    end
-   print(ident.." }")
+   print(ident.." },")
+   print(ident.." rets=")
+   self.rets:print(ident.."  ",",")
    print(ident.."}"..close)
 end
 
@@ -457,7 +471,7 @@ end
 -- Expects three strings: one representing the function declaration,
 -- another representing the argument list, and the third representing
 -- the "const" or empty string.
-function Function (d,a,c)
+function Function (d,a,c,r)
    --local t = split(strsub(a,2,-2),',') -- eliminate braces
    --local t = split_params(strsub(a,2,-2))
    if not flags['W'] and string.find(a, "%.%.%.%s*%)") then
@@ -465,6 +479,7 @@ function Function (d,a,c)
       return nil
    end
 
+   r=r or ""
    local i=1
    local l = {n=0}
 
@@ -491,6 +506,7 @@ function Function (d,a,c)
    local f = Declaration(d,'func')
    f.args = l
    f.const = c
+   f.rets = Declaration(f.type..r,'var',true)
    return _Function(f)
 end
 
