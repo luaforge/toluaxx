@@ -19,7 +19,7 @@ require("tlx_function")
 require("tlx_operator")
 require("tlx_class")
 require("tlx_clean")
---dofile(path.."custom.lua")
+--require("tlx_custom")
 require("tlx_doit")
 
 local err,msg = xpcall(doit, debug.traceback)

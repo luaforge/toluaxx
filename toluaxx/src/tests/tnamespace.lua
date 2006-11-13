@@ -27,4 +27,9 @@ assert(A.b==nil)        -- no access the inner module
 assert(A.c==nil)
 assert(B.c==nil)
 
+assert(B.d[0]==0)
+assert(B.d[1]==1)
+assert(B.d[2]==2)
+assert(B.d[3]==3)
+
 print("Namespace test OK")

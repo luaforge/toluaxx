@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_variable.lua,v 1.3 2006-11-07 16:36:12 phoenix11 Exp $
+-- $Id: tlx_variable.lua,v 1.4 2006-11-13 07:00:32 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -27,6 +27,7 @@ function classVariable:print (ident,close)
    print(ident.." type = '"..self.type.."',")
    print(ident.." ptr  = '"..self.ptr.."',")
    print(ident.." name = '"..self.name.."',")
+   print(ident.." lname = '"..self.lname.."',")
    if self.dim then print(ident.." dim = '"..self.dim.."',") end
    print(ident.." def  = '"..self.def.."',")
    print(ident.." ret  = '"..self.ret.."',")
@@ -71,8 +72,6 @@ end
 
 -- get variable value
 function classVariable:getvalue ()
-   local class = self:inclass()
-   local static = self:isstatic()
    local prop_get = self.prop_get
    local name
    if prop_get then name = prop_get.."()"
@@ -83,9 +82,9 @@ function classVariable:getvalue ()
       return p.."::"..gsub(self.lname or self.name,".*::","")
    end
    -- ++ >>
-   if class and static then
+   if self:inclass() and self:isstatic() then
       return self.parent.type..'::'..name
-   elseif class then
+   elseif self:inclass() then
       return 'self->'..name
    else
       return name
