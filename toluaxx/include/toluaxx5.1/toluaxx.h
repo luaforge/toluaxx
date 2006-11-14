@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: toluaxx.h,v 1.1.1.2 2006-10-25 10:57:17 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.2 2006-11-14 09:27:16 phoenix11 Exp $
 */
 
 /*
@@ -12,7 +12,7 @@
 ** Modernized by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: toluaxx.h,v 1.1.1.2 2006-10-25 10:57:17 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.2 2006-11-14 09:27:16 phoenix11 Exp $
 **
 */
 
@@ -64,6 +64,7 @@ extern "C" {
 #  define TOLUA_TEMPLATE_BIND(p)
 #  define TOLUA_PROTECTED_DESTRUCTOR
 #  define TOLUA_PROPERTY_TYPE(p)
+#  define tolua_readonly
 
   typedef int lua_Object;
 
@@ -175,6 +176,16 @@ extern "C" {
     lua_settop(L,ttop);							\
     /*DEBUG_STACK(precall);*/						\
   }
+  /* proxy parameters */
+
+  /* toluaxx proxy technique */
+#  define TOLUA_PROXY_TOP -1
+  TOLUA_API int  tolua_proxytop(lua_State* L);
+  TOLUA_API int  tolua_proxypush(lua_State* L);
+  TOLUA_API int  tolua_proxypop(lua_State* L);
+  TOLUA_API void tolua_proxylevel(lua_State* L, int level);
+  TOLUA_API void tolua_getproxy(lua_State* L, int level);
+  TOLUA_API void tolua_setproxy(lua_State* L, int level);
   
 #  ifdef __cplusplus
   static inline const char* tolua_tocppstring(lua_State* L, int narg, const char* def){

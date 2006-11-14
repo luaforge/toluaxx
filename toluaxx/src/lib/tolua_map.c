@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.1.1.2 2006-10-25 10:56:56 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.2 2006-11-14 09:27:16 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -22,7 +22,7 @@
 #include <math.h>
 
 
-static lua_State* toL=NULL;
+static lua_State* __tolua_current_state_=NULL;
 
 /* Call method to self object from C
  */
@@ -39,10 +39,10 @@ TOLUA_API int tolua_callmethod(lua_State* L,void* self,const char* type,const ch
 }*/
 
 TOLUA_API lua_State* tolua_state(){ /* Get current state  */
-  return toL;
+  return __tolua_current_state_;
 }
 TOLUA_API void tolua_setstate(lua_State* L){ /* Set current state */
-  toL=L;
+  __tolua_current_state_=L;
 }
 
 /* Create metatable
@@ -66,7 +66,7 @@ static int tolua_newmetatable (lua_State* L, char* name){
 
 /* Map super classes
  * It sets 'name' as being also a 'base', mapping all super classes of 'base' in 'name'
-*/
+ */
 static void mapsuper (lua_State* L, const char* name, const char* base) {
   /* push registry.super */
   lua_pushstring(L,"tolua_super");
@@ -278,6 +278,249 @@ static int tolua_bnd_getpeer(lua_State* L) {
 }
 #endif
 
+/*
+ *  toluaxx proxy technique
+ *  
+ *
+ */
+
+TOLUA_API void tolua_proxystack(lua_State* L){
+                                    /* stack: */
+  lua_pushstring(L,"tolua_proxy");  /* stack: "tolua_proxy" */
+  lua_rawget(L,LUA_REGISTRYINDEX);  /* stack: ?proxy_stack_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_stack_table? is not table */
+    lua_remove(L,-1);               /* stack: */
+    lua_pushnil(L);                 /* stack: nil */
+    return;
+  }
+                                    /* stack: proxy_stack_table */
+}
+
+TOLUA_API int tolua_proxytop(lua_State* L){
+  int __tolua_proxy_top_;
+  int __top_;
+  __top_=lua_gettop(L);              /* stack: */
+  lua_pushstring(L,"tolua_proxy");   /* stack: "tolua_proxy" */
+  lua_rawget(L,LUA_REGISTRYINDEX);   /* stack: ?proxy_stack_table? */
+  if(lua_istable(L,-1)){    /* check if ?proxy_stack_table? is table */
+    lua_pushnumber(L,0);             /* stack: proxy_stack_table 0 */
+    lua_rawget(L,-2);                /* stack: proxy_stack_table ?proxy_stack_top? */
+    if(lua_isnumber(L,-1)){ /* check if ?proxy_stack_top? is number */
+      __tolua_proxy_top_=lua_tonumber(L,-1);
+    }else __tolua_proxy_top_=-2;
+  }else __tolua_proxy_top_=-1;
+  lua_settop(L,__top_);
+  return __tolua_proxy_top_;
+}
+
+TOLUA_API int tolua_proxypush(lua_State* L){
+  int __tolua_proxy_top_;
+  
+  /* get proxy stack table */           /* stack: */
+  lua_pushstring(L,"tolua_proxy");      /* stack: "tolua_proxy" */
+  lua_rawget(L,LUA_REGISTRYINDEX);      /* stack: ?proxy_stack_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_stack_table? is not table */
+    lua_remove(L,-1);                   /* stack: */
+    return 0;
+  }
+
+  /* get stack level top counter */     /* stack: proxy_stack_table */
+  lua_pushnumber(L,0);                  /* stack: proxy_stack_table 0 */
+  lua_rawget(L,-2);                     /* stack: proxy_stack_table ?proxy_stack_top? */
+  if(!lua_isnumber(L,-1)){ /* check if ?proxy_stack_top? is not number */
+    lua_remove(L,-1);                   /* stack: proxy_stack_table */
+    lua_remove(L,-1);                   /* stack: */
+    return 0;
+  }
+  __tolua_proxy_top_=lua_tonumber(L,-1);
+  lua_remove(L,-1);                     /* stack: proxy_stack_table */
+
+  /* decrement stack level top counter */
+  __tolua_proxy_top_=__tolua_proxy_top_+1;
+  lua_pushnumber(L,0);                  /* stack: proxy_stack_table 0 */
+  lua_pushnumber(L,__tolua_proxy_top_); /* stack: proxy_stack_table 0 new_proxy_stack_top */
+  lua_rawset(L,-3);                     /* stack: proxy_stack_table */
+  
+  /* create a new proxy stack level */
+  lua_pushnumber(L,__tolua_proxy_top_); /* stack: proxy_stack_table new_proxy_stack_top */
+  lua_newtable(L);                      /* stack: proxy_stack_table new_proxy_stack_level */
+  lua_rawset(L,-3);                     /* stack: proxy_stack_table */
+  
+  /* clear lua stack */
+  lua_remove(L,-1);                     /* stack: */
+  return 1;
+}
+
+TOLUA_API int tolua_proxypop(lua_State* L){
+  int __tolua_proxy_top_;
+  
+  /* get proxy stack table */           /* stack: */
+  lua_pushstring(L,"tolua_proxy");      /* stack: "tolua_proxy" */
+  lua_rawget(L,LUA_REGISTRYINDEX);      /* stack: ?proxy_stack_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_stack_table? is not table */
+    lua_remove(L,-1);                   /* stack: */
+    return 0;
+  }
+  
+  /* get stack level top counter */     /* stack: proxy_stack_table */
+  lua_pushnumber(L,0);                  /* stack: proxy_stack_table 0 */
+  lua_rawget(L,-2);                     /* stack: proxy_stack_table ?proxy_stack_top? */
+  if(!lua_isnumber(L,-1)){ /* check if ?proxy_stack_top? is not number */
+    lua_remove(L,-1);                   /* stack: proxy_stack_table */
+    lua_remove(L,-1);                   /* stack: */
+    return 0;
+  }
+  __tolua_proxy_top_=lua_tonumber(L,-1);
+  lua_remove(L,-1);                     /* stack: proxy_stack_table */
+  if(__tolua_proxy_top_<1){ /* check if proxy top counter is smaller one */
+    lua_remove(L,-1);                   /* stack: */
+    return 0;
+  }
+  /* remove proxy stack level */
+  lua_pushnumber(L,__tolua_proxy_top_); /* stack: proxy_stack_table proxy_stack_top */
+  lua_pushnil(L);                       /* stack: proxy_stack_table  */
+  lua_rawset(L,-3);                     /* stack: proxy_stack_table */
+  
+  /* decrement stack level top counter */
+  __tolua_proxy_top_=__tolua_proxy_top_-1;
+  lua_pushnumber(L,0);                  /* stack: proxy_stack_table 0 */
+  lua_pushnumber(L,__tolua_proxy_top_); /* stack: proxy_stack_table 0 new_proxy_stack_top */
+  lua_rawset(L,-3);                     /* stack: proxy_stack_table */
+  
+  /* clear lua stack */
+  lua_remove(L,-1);                     /* stack: */
+  return 1;
+}
+
+TOLUA_API void tolua_proxylevel(lua_State* L, int level){
+                                    /* stack: */
+  int __tolua_proxy_top_=tolua_proxytop(L);
+  if( level>+__tolua_proxy_top_ ||
+      level<-__tolua_proxy_top_ ||
+      level==0 ){ /* check if level exceded */
+    lua_pushnil(L);                 /* stack: nil */
+    return;
+  }                                 /* stack: */
+  lua_pushstring(L,"tolua_proxy");  /* stack: "tolua_proxy" */
+  lua_rawget(L,LUA_REGISTRYINDEX);  /* stack: ?proxy_stack_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_stack_table? is not table */
+    lua_remove(L,-1);               /* stack: */
+    lua_pushnil(L);                 /* stack: nil */
+    return;
+  }
+                                    /* stack: proxy_stack_table */
+  level=level>0?level:__tolua_proxy_top_+level+1;
+  lua_pushnumber(L,level);          /* stack: proxy_stack_table proxy_stack_level */
+  lua_rawget(L,-2);                 /* stack: proxy_stack_table ?proxy_level_table? */
+  lua_remove(L,-2);                 /* stack: ?proxy_level_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_level_table? is not table */
+    lua_remove(L,-1);               /* stack: */
+    lua_pushnil(L);                 /* stack: nil */
+    return;
+  }
+  return;                           /* stack: proxy_level_table */
+}
+
+TOLUA_API void tolua_getproxy(lua_State* L, int level){
+                                    /* stack: key */
+  tolua_proxylevel(L,level);        /* stack: key ?proxy_level_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_level_table? is not table */
+    lua_remove(L,-1);               /* stack: key */
+    lua_remove(L,-1);               /* stack: */
+    lua_pushnil(L);                 /* stack: nil */
+    return;
+  }                                 /* stack: key proxy_level_table */
+  lua_insert(L,-2);                 /* stack: proxy_level_table key */
+  lua_rawget(L,-2);                 /* stack: proxy_level_table value */
+  lua_remove(L,-2);                 /* stack: value */
+  return;
+}
+
+TOLUA_API void tolua_setproxy(lua_State* L, int level){
+                                    /* stack: key val */
+  tolua_proxylevel(L,level);        /* stack: key val ?proxy_level_table? */
+  if(!lua_istable(L,-1)){  /* check if ?proxy_level_table? is not table */
+    lua_remove(L,-1);               /* stack: key val */
+    lua_remove(L,-1);               /* stack: key */
+    lua_remove(L,-1);               /* stack: */
+    return;
+  }                                 /* stack: key val proxy_level_table */
+  lua_insert(L,-3);                 /* stack: proxy_level_table key val */
+  lua_rawset(L,-3);                 /* stack: proxy_level_table */
+  lua_remove(L,-2);                 /* stack: */
+  return;
+}
+
+static int tolua_bnd_proxy_push(lua_State* L){
+  int __ret_code_;
+  __ret_code_=tolua_proxypush(L);
+  lua_pushboolean(L,__ret_code_);
+  return 1;
+}
+
+static int tolua_bnd_proxy_pop(lua_State* L){
+  int __ret_code_;
+  __ret_code_=tolua_proxypop(L);
+  lua_pushboolean(L,__ret_code_);
+  return 1;
+}
+
+/* local level_table = tolua.proxy.level(<level>) */
+static int tolua_bnd_proxy_level(lua_State* L){
+                                     /* stack: <level> */
+  int __proxy_level_=TOLUA_PROXY_TOP;
+  if(lua_isnumber(L,1)){ /* check if level has been retrieved */
+                                     /* stack: level */
+    __proxy_level_=lua_tonumber(L,1);
+    lua_remove(L,1);                 /* stack: */
+  }                                  /* stack: */
+  tolua_proxylevel(L,__proxy_level_);
+  return 1;
+}
+
+/* local val = tolua.proxy.get(key<,level>) */
+static int tolua_bnd_proxy_get(lua_State* L){
+                                     /* stack: key <level> */
+  int __proxy_level_=TOLUA_PROXY_TOP;
+  if(lua_gettop(L)<1 || lua_isnil(L,1)){  /* check if key hasn't been retrieved */
+    lua_pushnil(L);
+    return 1;
+  }
+  if(lua_isnumber(L,2)){ /* check if level has been retrieved */
+                                     /* stack: key level */
+    __proxy_level_=lua_tonumber(L,2);
+    lua_remove(L,2);                 /* stack: key */
+  }                                  /* stack: key */
+  tolua_getproxy(L,__proxy_level_);  /* stack: val */
+  return 1;
+}
+
+/* tolua.proxy.set(key,value<,level>) */
+static int tolua_bnd_proxy_set(lua_State* L){
+                                     /* stack: key val <level> */
+  int __proxy_level_=TOLUA_PROXY_TOP;
+  if(lua_gettop(L)<1 || lua_isnil(L,1)){  /* check if key hasn't been retrieved */
+    return 0;
+  }
+  if(lua_gettop(L)<2){  /* check if val hasn't been retrieved */
+    return 0;
+  }
+  if(lua_isnumber(L,3)){ /* check if level has been retrieved */
+                                     /* stack: key val level */
+    __proxy_level_=lua_tonumber(L,3);
+    lua_remove(L,3);                 /* stack: key val */
+  }                                  /* stack: key val */
+  tolua_setproxy(L,__proxy_level_);  /* stack: */
+  return 0;
+}
+
+/* local top = tolua.proxy.top() */
+static int tolua_bnd_proxy_top(lua_State* L){
+  int __top_=tolua_proxytop(L);
+  lua_pushnumber(L,__top_);
+  return 1;
+}
+
 /* static int class_gc_event (lua_State* L); */
 
 TOLUA_API void tolua_open (lua_State* L){
@@ -300,12 +543,23 @@ TOLUA_API void tolua_open (lua_State* L){
     lua_pushstring(L,"tolua_ubox"); lua_newtable(L);
     /* make weak value metatable for ubox table to allow userdata to be
        garbage-collected */
-    lua_newtable(L); lua_pushliteral(L, "__mode"); lua_pushliteral(L, "v"); lua_rawset(L, -3);               /* stack: string ubox mt */
+    lua_newtable(L); lua_pushliteral(L, "__mode"); lua_pushliteral(L, "v"); lua_rawset(L, -3);
+    /* stack: string ubox mt */
     lua_setmetatable(L, -2);  /* stack: string ubox */
     lua_rawset(L,LUA_REGISTRYINDEX);
     
     lua_pushstring(L,"tolua_super"); lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
-    lua_pushstring(L,"tolua_gc"); lua_newtable(L);lua_rawset(L,LUA_REGISTRYINDEX);
+    lua_pushstring(L,"tolua_gc");    lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
+    
+    /* create proxy table */
+    lua_pushstring(L,"tolua_proxy");
+    lua_newtable(L);
+    /* insert counter into proxy table */
+    lua_pushnumber(L,0);
+    lua_pushnumber(L,0);
+    lua_rawset(L,-3);
+    /* register proxy table */
+    lua_rawset(L,LUA_REGISTRYINDEX);
     
     /* create gc_event closure */
     lua_pushstring(L, "tolua_gc_event");
@@ -328,10 +582,20 @@ TOLUA_API void tolua_open (lua_State* L){
     tolua_function(L,"cast",tolua_bnd_cast);
     tolua_function(L,"inherit", tolua_bnd_inherit);
 #ifdef LUA_VERSION_NUM /* lua 5.1 */
-    tolua_function(L, "setpeer", tolua_bnd_setpeer);
-    tolua_function(L, "getpeer", tolua_bnd_getpeer);
+    tolua_function(L,"setpeer", tolua_bnd_setpeer);
+    tolua_function(L,"getpeer", tolua_bnd_getpeer);
 #endif
     
+    tolua_module(L,"proxy",0);
+    tolua_beginmodule(L,"proxy");
+    tolua_function(L,"top",  tolua_bnd_proxy_top);
+    tolua_function(L,"push", tolua_bnd_proxy_push);
+    tolua_function(L,"pop",  tolua_bnd_proxy_pop);
+    tolua_function(L,"set",  tolua_bnd_proxy_set);
+    tolua_function(L,"get",  tolua_bnd_proxy_get);
+    tolua_function(L,"level",tolua_bnd_proxy_level);
+    tolua_endmodule(L);
+
     tolua_endmodule(L);
     tolua_endmodule(L);
   }
