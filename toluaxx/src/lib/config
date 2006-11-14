@@ -18,11 +18,13 @@ lib.static=$(LIB.STATIC)
 lib.shared=$(LIB.SHARED)
 
 ifeq ($(PKGCONFIG),enable)
-$(PREFIX)/lib/pkgconfig/toluaxx5.1.pc: src/lib/toluaxx5.1.pc
+PKG_FILE_PATH=/usr/lib/pkgconfig/toluaxx5.1.pc
+$(PKG_FILE_PATH): src/lib/toluaxx5.1.pc
 	@$(ECHO) Install $^ to $@....
-	@$(EXEC) $(CP) $^ $@
-lib.install.prep: $(PREFIX)/lib/pkgconfig/toluaxx5.1.pc
+	@$(EXEC) $(ECHO) prefix=$(PREFIX) > $@
+	@$(EXEC) cat $^ >> $@
+lib.install.prep: $(PKG_FILE_PATH)
 lib.uninstall.prep:
-	@$(ECHO) Uninstall $(PREFIX)/lib/pkgconfig/toluaxx5.1.pc....
-	@$(EXEC) $(RM) $(PREFIX)/lib/pkgconfig/toluaxx5.1.pc
+	@$(ECHO) Uninstall $(PKG_FILE_PATH)....
+	@$(EXEC) $(RM) $(PKG_FILE_PATH)
 endif

@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: toluaxx.h,v 1.2 2006-11-14 09:27:16 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.3 2006-11-14 18:41:42 phoenix11 Exp $
 */
 
 /*
@@ -12,7 +12,7 @@
 ** Modernized by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: toluaxx.h,v 1.2 2006-11-14 09:27:16 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.3 2006-11-14 18:41:42 phoenix11 Exp $
 **
 */
 
@@ -43,12 +43,12 @@ extern "C" {
 #ifdef DEBUG_MODE
 #  define DEBUG_STACK(msg) {						\
     int i;								\
-    printf("Operation %s:\n",#msg);					\
-    printf("Stack {\n");						\
+    printf("Operation `%s`\n",#msg);					\
+    printf("  Stack {\n");						\
     for (i=1;i<=lua_gettop(L);i++) {					\
-      printf("  value:%d type:%s \n",i,lua_typename(L,lua_type(L,i)));	\
+      printf("    value:%d type:%s \n",i,lua_typename(L,lua_type(L,i)));	\
     }									\
-    printf("}\n");							\
+    printf("  }\n");							\
   }
 #else
 #  define DEBUG_STACK(msg) ;
@@ -64,7 +64,7 @@ extern "C" {
 #  define TOLUA_TEMPLATE_BIND(p)
 #  define TOLUA_PROTECTED_DESTRUCTOR
 #  define TOLUA_PROPERTY_TYPE(p)
-#  define tolua_readonly
+#  define tolua_readonly const
 
   typedef int lua_Object;
 

@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.4 2006-10-31 14:26:53 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.5 2006-11-14 18:41:42 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -371,6 +371,7 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
  * an object) or in the own table (that represents the class or module).
  */
 static int class_newindex_event (lua_State* L){
+  //DEBUG_STACK(class_newindex_event init);
   int t = lua_type(L,1);
   if (t == LUA_TUSERDATA){                   /* stack: obj key val */
     /* Try accessing a C/C++ variable to be set */
@@ -418,8 +419,10 @@ static int class_newindex_event (lua_State* L){
     lua_settop(L,3);                         /* stack: obj key val */
     if (lua_isstring(L,2)) {                 /* check if key is a string value */
       /* try operator[](string) */
+      //DEBUG_STACK(class_newindex_event try operator[](string));
       lua_getmetatable(L,1);                 /* stack: obj key val mt */
       while (lua_istable(L,-1)) {            /* check if mt is table */
+	//DEBUG_STACK(class_newindex_event while (lua_istable(L,-1)));
 	lua_pushstring(L,".sets");           /* stack: obj key val mt ".sets" */
 	lua_rawget(L,-2);                    /* stack: obj key val mt ?func? */
 	if (lua_isfunction(L,-1)) {          /* check if ?func? is a function */
@@ -428,6 +431,7 @@ static int class_newindex_event (lua_State* L){
 	  lua_pushvalue(L,3);                /* stack: obj key val mt func obj key val */
 	  /*--lua_call(L,3,0);--*/           /*-- stack: obj key val mt --*/
 	  int t=lua_gettop(L)-1;
+	  //DEBUG_STACK(class_newindex_event call .sets);
 	  lua_call(L,3,3);                   /* stack: obj key val mt <?obj? ?key? ?val?> */
 	  if (lua_isuserdata(L,t-2) &&
 	      lua_isstring(L,t-1)) {         /* check if .sets not passed */
@@ -442,10 +446,12 @@ static int class_newindex_event (lua_State* L){
 	    }
 	    return 0;                        /* stack: no value */
 	  }
+	}else lua_remove(L,-1);
+	if (!lua_getmetatable(L,-1)){        /* stack: obj key val mt ?next_mt? */
+	  lua_pushnil(L);                    /* stack: obj key val mt ?next_mt? nil */
+	  lua_remove(L,-2);                  /* stack: obj key val nil */
 	}
-	if (!lua_getmetatable(L,-1))         /* stack: obj key val mt ?next_mt? */
-	  lua_pushnil(L);                    /* stack: obj key val mt nil */
-	lua_remove(L,-2);                    /* stack: obj key val next_mt */
+	                                     /* stack: obj key val next_mt */
       }
     }
     lua_settop(L,3);                         /* stack: obj key val */
