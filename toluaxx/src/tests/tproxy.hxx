@@ -6,6 +6,14 @@ using namespace std;
 
 class OBJECT{
  public:
+  struct COLOR{
+    int self;
+    int emit;
+    operator string();
+    COLOR():self(1),emit(0){}
+  };
+ 
+  COLOR color;
   OBJECT* parent;
   string name;
   int live;

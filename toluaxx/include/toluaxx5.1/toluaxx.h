@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: toluaxx.h,v 1.3 2006-11-14 18:41:42 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.4 2006-11-15 07:53:40 phoenix11 Exp $
 */
 
 /*
@@ -12,7 +12,7 @@
 ** Modernized by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: toluaxx.h,v 1.3 2006-11-14 18:41:42 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.4 2006-11-15 07:53:40 phoenix11 Exp $
 **
 */
 
@@ -64,7 +64,6 @@ extern "C" {
 #  define TOLUA_TEMPLATE_BIND(p)
 #  define TOLUA_PROTECTED_DESTRUCTOR
 #  define TOLUA_PROPERTY_TYPE(p)
-#  define tolua_readonly const
 
   typedef int lua_Object;
 

@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.5 2006-11-14 18:41:42 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.6 2006-11-15 07:53:40 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -464,14 +464,77 @@ static int class_newindex_event (lua_State* L){
 }
 #endif
 
+
+/*
+ *  .... obj tab
+ *    next with tab
+ *  .... obj tab key val
+ *    if val isn't table
+ *    set to obj
+ *  .... obj tab 
+ *    else
+ *    get from obj field with key
+ *  .... obj tab key val fld
+ *    swap fld and val
+ *  .... obj tab key fld val
+ *    recursive call this function
+ *  .... obj tab key fld val
+ *    remove key, fld and val
+ *  .... obj tab
+ *    repeat it
+ */
+
+/* extended table construstor */
+static int tolua_class_attribs_from_table(lua_State* L){
+  if(!lua_isuserdata(L,-2) || !lua_istable(L,-1))return 0;
+                                            /* stack: obj tab */
+  lua_pushnil(L);                           /* stack: obj tab nil */
+  for(;lua_next(L,-2)!=0;){                 /* stack: obj tab key val */
+    //DEBUG_STACK(lua_next(L,-1)!=0);
+    if(lua_istable(L,-1)){                  /* check if val is table */
+      lua_pushvalue(L,-2);                  /* stack: obj tab key val key */
+      lua_gettable(L,-5);                   /* stack: obj tab key val fld */
+      lua_insert(L,-2);                     /* stack: obj tab key fld val */
+      tolua_class_attribs_from_table(L);    /* stack: obj tab key fld val */
+      lua_remove(L,-1);                     /* stack: obj tab key fld */
+      lua_remove(L,-1);                     /* stack: obj tab key */
+    }else{
+                                            /* stack: obj tab key val */
+      lua_pushvalue(L,-2);                  /* stack: obj tab key val key */
+      lua_insert(L,-2);                     /* stack: obj tab key key val */
+      lua_settable(L,-5);                   /* stack: obj tab key */
+    }
+  }
+  //DEBUG_STACK(lua_next(L,-1)!=0 end);
+  return 1;                                 /* stack: obj tab */
+}
+
 static int class_call_event(lua_State* L) {
-  if (lua_istable(L,1)) {              /* stack: obj */
-    lua_pushstring(L,".call");         /* stack: obj name */
-    lua_rawget(L,1);                   /* stack: obj name ?func? */
-    if (lua_isfunction(L,-1)) {        /* func is function? */
-      lua_insert(L,1);                 /* stack: func obj name */
-      lua_call(L,lua_gettop(L)-1,1);   /* stack: func ret */
-      return 1;                        /* stack: ret */
+  if (lua_istable(L,1)) {                   /* stack: obj <args> */
+    lua_pushstring(L,".call");              /* stack: obj <args> ".call" */
+    lua_rawget(L,1);                        /* stack: obj <args> ?func? */
+    if (lua_isfunction(L,-1)) {             /* chack if ?func? is function */
+      lua_insert(L,1);                      /* stack: func obj <args> */
+      DEBUG_STACK(lua_isfunction(L,-1) lua_insert(L,1));
+      if(lua_gettop(L)>2 && lua_istable(L,-1)){ /* chack if last arg is lua table */
+	DEBUG_STACK(lua_gettop(L)>2 && lua_istable(L,-1));
+	                                    /* stack: func obj <args> table */
+	lua_insert(L,1);                    /* stack: table func obj <args> */
+	DEBUG_STACK(lua_insert(L,1));
+	lua_call(L,lua_gettop(L)-2,1);      /* stack: table ret */
+	DEBUG_STACK(lua_call(L,lua_gettop(L)-2,1));
+	lua_insert(L,-2);                   /* stack: ret table */
+	DEBUG_STACK(lua_insert(L,-2));
+	tolua_class_attribs_from_table(L);  /* stack: ret table */
+	DEBUG_STACK(tolua_class_attribs_from_table(L));
+	lua_remove(L,-1);                   /* stack: ret */
+	DEBUG_STACK(tolua_class_attribs_from_table(L) lua_remove(L,-1));
+	return 1;                           /* stack: ret */
+      }else{
+	                                    /* stack: func obj <args> */
+	lua_call(L,lua_gettop(L)-1,1);      /* stack: func ret */
+	return 1;                           /* stack: ret */
+      }
     }
   }
   if (lua_isuserdata(L,1)) {           /* stack: obj {args} */

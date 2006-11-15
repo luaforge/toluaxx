@@ -9,7 +9,7 @@ typedef enum {
   SECOND = 2
 } Order;
 
-class Point{          
+class Point{
   char m_s[64];
   float m_x;
   float m_y;
@@ -60,7 +60,9 @@ public:
   float& operator[] (int i){ return (i==0) ? m_x : m_y; }
   
   static Error echo (Error e){ return e; }
-
+  
+  static const Point null;
+  static const Point one;
 };
 
 inline Point add (const Point& p1, const Point& p2){ return p1+p2; }

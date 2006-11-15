@@ -22,13 +22,15 @@ MODE=real
 ## OS/Platform
 ## [linux|win32|....]
 PLATFORM=linux
+
+#PLATFORM=win32
+
 ## Compiler Collection
 ## [gcc|msvs|mingw|....]
 COMPILER=gcc
 
-#PLATFORM=win32
-#COMPILER=msvs
 #COMPILER=mingw
+#COMPILER=msvs
 
 LIB.STATIC=enable
 LIB.SHARED=disable

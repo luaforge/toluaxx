@@ -1,5 +1,14 @@
 #include "tproxy.hxx"
 
+OBJECT::COLOR::operator string(){
+  string r="COLOR{self=";
+  {char b[25]; sprintf(b,"%d",self); r+=b;}
+  r+=",emit=";
+  {char b[25]; sprintf(b,"%d",emit); r+=b;}
+  r+="}";
+  return r;
+}
+
 OBJECT::operator string(){
   return string("OBJECT{name=\"")+name+string("\"}");
 }

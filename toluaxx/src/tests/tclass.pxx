@@ -85,5 +85,7 @@ namespace Test {
 
 }; // end of namespace
 
+
+
 void init();
 void dest();

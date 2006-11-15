@@ -113,6 +113,9 @@ assert(Point.ERROR==Point:echo(Point.ERROR))
 assert(FIRST==invert(SECOND))
 assert(SECOND==invert(FIRST))
 
+--assert(Point(1,0)+Point.one==Point(2,1))
+--assert(Point(0,0)==Point.null)
+
 -- call lua method from c++
 local o=Object()
 local handler_called=false
