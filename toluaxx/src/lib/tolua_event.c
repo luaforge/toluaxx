@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.6 2006-11-15 07:53:40 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.7 2006-11-19 13:41:15 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -549,7 +549,7 @@ static int class_call_event(lua_State* L) {
 	/*DEBUG_STACK("prepare");*/
 	if(lua_gettop(L)==4&&lua_isnil(L,3))lua_insert(L,3); /* args ={ key nil } */
 	/*DEBUG_STACK("prep call");*/
-	lua_call(L,lua_gettop(L)-1,2); /* stack: {rets} */   /* rets ={ nil key } */
+	lua_call(L,lua_gettop(L)-1,-1); /* stack: {rets} */   /* rets ={ nil key } */
 	/*if(lua_gettop(L)==2&&lua_isnil(L,2))lua_insert(L,1);*/ /* rets ={ key nil } */
 	/*DEBUG_STACK("post call");*/
 	return lua_gettop(L);          /* stack: {rets} */

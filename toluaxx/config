@@ -22,13 +22,11 @@ MODE=real
 ## OS/Platform
 ## [linux|win32|....]
 PLATFORM=linux
-
 #PLATFORM=win32
 
 ## Compiler Collection
 ## [gcc|msvs|mingw|....]
 COMPILER=gcc
-
 #COMPILER=mingw
 #COMPILER=msvs
 
