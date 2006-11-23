@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: toluaxx.h,v 1.4 2006-11-15 07:53:40 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.5 2006-11-23 19:43:54 phoenix11 Exp $
 */
 
 /*
@@ -12,7 +12,7 @@
 ** Modernized by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: toluaxx.h,v 1.4 2006-11-15 07:53:40 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.5 2006-11-23 19:43:54 phoenix11 Exp $
 **
 */
 
@@ -54,8 +54,8 @@ extern "C" {
 #  define DEBUG_STACK(msg) ;
 #endif
 
-#  define tolua_pushcppstring(x,y)	tolua_pushstring(x,y.c_str())
-#  define tolua_iscppstring	tolua_isstring
+#  define tolua_pushcppstring(x,y) tolua_pushstring(x,(y.c_str()))
+#  define tolua_iscppstring tolua_isstring
 
 #  define tolua_iscppstringarray tolua_isstringarray
 #  define tolua_pushfieldcppstring(L,lo,idx,s) tolua_pushfieldstring(L, lo, idx, s.c_str())
@@ -190,11 +190,15 @@ extern "C" {
   static inline const char* tolua_tocppstring(lua_State* L, int narg, const char* def){
     const char* s = tolua_tostring(L, narg, def);
     return s?s:"";
-  };
+  }
+  
   static inline const char* tolua_tofieldcppstring(lua_State* L, int lo, int index, const char* def){
     const char* s = tolua_tofieldstring(L, lo, index, def);
     return s?s:"";
-  };
+  }
+//# include<string>
+//  static inline const char* tolua_tocppstring(lua_State* L, int narg, std::string def){return tolua_tocppstring(L,lo,def.c_str());}
+//  static inline const char* tolua_tofieldcppstring(lua_State* L, int lo, int index, std::string def){return tolua_tofieldcppstring(L,narg,index,def.c_str());}
 #  else
 #    define tolua_tocppstring tolua_tostring
 #    define tolua_tofieldcppstring tolua_tofieldstring

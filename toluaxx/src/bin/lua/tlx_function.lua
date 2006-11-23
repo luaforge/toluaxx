@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_function.lua,v 1.4 2006-11-09 21:22:02 phoenix11 Exp $
+-- $Id: tlx_function.lua,v 1.5 2006-11-23 19:43:54 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -275,6 +275,11 @@ function classFunction:supcode (local_constructor)
       end
       local i=1
       while self.args[i] do
+	 if self.args.n==2 then
+	    if self.try_overload_nil and overload >= 0 then
+	       self.args[i].try_overload_nil=true
+	    end
+	 end
 	 nret = nret + self.args[i]:retvalue()
 	 i = i+1
       end

@@ -71,3 +71,67 @@ void TST::delvar(string k,void* o){
   if(str.find(k)!=str.end())str.erase(k);
 }
 
+
+void MULTI::getnum(string k,int* n/**=self->nonum asnil**/){
+  if(pool_num.find(k)!=pool_num.end()){
+    *n=pool_num[k];
+    nonum=*n+1;
+    if(*n==nonum)nonum=*n+1;
+  }else{
+    *n=nonum;
+  }
+}
+
+void MULTI::getstr(string k,string* s/**=self->nostr asnil**/){
+  if(pool_str.find(k)!=pool_str.end()){
+    *s=pool_str[k];
+    if(*s==nostr)nostr=*s+" ";
+  }else{
+    *s=nostr;
+  }
+}
+
+void MULTI::getbool(string k,bool* b/**=self->nostr asnil**/){
+  if(pool_bool.find(k)!=pool_bool.end()){
+    *b=pool_bool[k];
+    if(*b==nobool)nobool=!*b;
+  }else{
+    *b=nobool;
+  }
+}
+
+void MULTI::setnum(string k,int n){
+//  cout<<"setnum"<<endl;
+  delvar(k,NULL);
+  pool_num[k]=n;
+}
+void MULTI::setstr(string k,string s){
+//  cout<<"setstr"<<endl;
+  delvar(k,NULL);
+  pool_str[k]=s;
+}
+void MULTI::setbool(string k,bool b){
+//  cout<<"setbool"<<endl;
+  delvar(k,NULL);
+  pool_bool[k]=b;
+}
+void MULTI::delvar(string k,void* n){
+  if(n!=NULL)return;
+  if(pool_str.find(k)!=pool_str.end())pool_str.erase(k);
+  if(pool_num.find(k)!=pool_num.end())pool_num.erase(k);
+  if(pool_bool.find(k)!=pool_bool.end())pool_bool.erase(k);
+}   
+
+bool MULTI::is(string k){
+  return isnum(k)||isstr(k)||isbool(k);
+}
+bool MULTI::isnum(string k){
+  return pool_num.find(k)!=pool_num.end();
+}
+bool MULTI::isstr(string k){
+  return pool_str.find(k)!=pool_str.end();
+}
+bool MULTI::isbool(string k){
+  return pool_bool.find(k)!=pool_bool.end();
+}
+

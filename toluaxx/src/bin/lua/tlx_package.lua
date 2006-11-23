@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_package.lua,v 1.1.1.2 2006-10-25 10:55:42 phoenix11 Exp $
+-- $Id: tlx_package.lua,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -115,6 +115,12 @@ function classPackage:preamble ()
    output('#endif\n')
    output('#include "string.h"\n\n')
    output('#include "toluaxx.h"\n\n')
+
+   output('#ifdef __cplusplus\n')
+   output('#include<string>\n')
+   output('inline const char* tolua_tocppstring(lua_State* L, int narg, std::string def){return tolua_tocppstring(L,narg,def.c_str());}\n')
+   output('inline const char* tolua_tofieldcppstring(lua_State* L, int lo, int index, std::string def){return tolua_tofieldcppstring(L,lo,index,def.c_str());}\n')
+   output('#endif\n')
    
    if not flags.h then
       output('/* Exported function */')

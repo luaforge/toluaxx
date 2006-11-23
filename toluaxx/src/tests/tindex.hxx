@@ -147,6 +147,34 @@ public:
 };
 //tolua_end
 
-//class MULTYTYPE {
-  
-//};
+class MULTI{//tolua_export
+protected:
+  map<string,int> pool_num;
+  map<string,string> pool_str;
+  map<string,bool> pool_bool;
+public:
+  int nonum;
+  string nostr;
+  bool nobool;
+public:
+  //tolua_begin
+  MULTI(){}
+  ~MULTI(){}
+  bool is(string);
+  bool isnum(string);
+  bool isstr(string);
+  bool isbool(string);
+  /**tolua_getindex {**/
+  void getnum(string,int* /**num=self->nonum asnil**/);
+  void getstr(string,string* /**str=self->nostr asnil**/);
+  void getbool(string,bool* /**b=self->nobool asnil**/);
+  /**}**/
+  /**tolua_setindex {**/
+  void setnum(string,int n);
+  void setstr(string,string s);
+  void setbool(string,bool b);
+  void delvar(string,void*n);
+  /**}**/
+};
+//tolua_end
+

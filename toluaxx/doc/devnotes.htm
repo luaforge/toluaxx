@@ -29,43 +29,157 @@
   </td></tr>
   <!-- content -->
   <tr><td id=content>
+  <p><a name="2006-11-15:">2006-11-15:</a>
+  <hr>
+<p>Added table object constructor : you can set the values of the object params by 	passing arguments to the object constructor
+
+<p>Example:
+
+<pre>	-------tolua-table-constructor.hxx----------
+	class TCLASS{
+	....
+	  struct TPARAM{
+	    int value;
+	    string name;
+	  };
+	....
+	  TPARAM param;
+	  int value;
+	  string name;
+	....
+	  TCLASS();
+	....
+	};
+
+	-------tolua-table-constructor.lua----------
+	local t=TCLASS{
+	   name="newopt",
+	   param={
+	      name="newsubopt",
+	      value
+	   },
+	   value=0.12
+	}
+	
+</pre>
+<p><a name="2006-11-14:">2006-11-14:</a>
+<hr>
+<p>Added proxy stack parameter pass technology. Proxy stack consists of enumerated 	levels from 1 to N. Each level holds several named params. If you specify positive 	value N during stack level call, this means that you call N th element from the 	beginning of the stack, negative value means that you call nth element from the end 	of the stack. Empty stack has zero level count;
+	toluaxx API functions for parameters stack handling:
+<pre>
+	int  tolua_proxytop(lua_State* L);
+	/* return the current top of the stack */
+	
+	int  tolua_proxypush(lua_State* L);
+	/* creates empty stack level */
+	
+	int  tolua_proxypop(lua_State* L);
+	/* erases top level of the stack */
+	
+	void tolua_proxylevel(lua_State* L, int level);
+	/* extracts queried level as a table */
+						
+	void tolua_getproxy(lua_State* L, int level);
+	/* returns the value of queried stack level parameter */
+	/* (similar to lua_gettable()) */
+	
+	void tolua_setproxy(lua_State* L, int level);
+	/* sets the value of the stack level */
+	/* (similar lua_settable()) */
+</pre>
+<p>toluaxx proxy functions, available from lua:
+<pre>
+	local top = tolua.proxy.top()
+	-- returns stack top
+	-- top will be equal to current stack top
+
+	local level = tolua.proxy.level(&lt;level>)
+	-- returns stack level &lt;level> (top level by default)
+	-- level will content a table of selected level params
+
+	local state = tolua.proxy.push()
+	-- creates new stack level (on top)
+	-- state will be set to true if operation successful
+	-- false - in case of stack overflow
+
+	local state = tolua.proxy.pop()
+	-- pop top level of the stack
+	-- state - true if ok
+	-- false - false if stack is empty
+
+	local val = tolua.proxy.get(key&lt;,level>)
+	-- extracts the parameter key from the &lt;level> level of the stack (top by default)
+	-- val will be set to the parameter value, nil if no such parameter exists 
+
+	tolua.proxy.set(key,value&lt;,level>)
+	-- assigns value to the parameter key from the level stack level (top by default)
+</pre>
+<p>	toluaxx/src/test/tproxy.* contain examples for this functions
+
+<p><a name="2006-11-13:">2006-11-13:</a>
+<hr>
+<p>	Corrected export of arrays which are situated inside namespaces	
+
+<p><a name="2006-11-10:">2006-11-10:</a>
+<hr>
+<p>	Added tolua_getindex { } and tolua_setindex { } directives.
+	First one serves for index extracting, another - for setting index. 
+	These functions allow `.{get,set}{i,s}` methods specification.
+
+<p>	Example:
+	
+<pre>	-------tolua-get-set-index.hxx-------
+	class TOBJECT{
+	....
+	};
+	class TGROUP: public TOBJECT{
+	  /**tolua_getindex {**/
+	  TOBJECT* get(string);
+	  /**}**/
+	  /**tolua_setindex {**/
+	  void set(string,TOBJECT*);
+	  /**}**/
+	....
+	};
+		
+	-------tolua-index-test.lua----------
+	local g1=TGROUP()
+	g1.o1=TOBJECT()  --- set method call
+	local o1=g1.o1    --- get method call
+</pre>
+
+<p><a name="2006-10-24:">2006-10-24:</a>
+<hr>
+<p>Moved userdata added to the objects through .set{i,s} methods to peer to disable 	garbage collecting during runtime on them.
+	
+<p>	Example:
+<pre>	
+	local g1=GRP()
+	local o1=OBJ()
+	
+	g1.o1=o1
+	collectgarbage"collect" --- object o1 will not be colected,
+				--- because the link still exists
+				--- in the local scope
+	
+	g1.o2=OBJ()
+	collectgarbage"collect" --- object g1.o2 will be collected
+				--- because it was created in lua and there is no link on it
+</pre>
+<p>	--- the (2006-10-24) fix solves this problem by moving the link on the object to the 	
+	<br>--- peer g1
+<p><a name="2006-10-23:">2006-10-23:</a>
+<hr>
+<p>	Special comment `/**` bind code `**/` &lt;bind code> is now invisible to C/C++ compiler, 	but toluaxx preprocessor still parses it. Now all the export code can be placed 	inside the header files
+	
 <p><a name="2006-10-04">2006-10-04:</a>
   <hr>
-	<p>Added the default specificator "asnil". The variable would be interpreted
-	as nil if it is equal to the default value.
+<p>Added the default specificator "asnil". The variable would be interpreted
+as nil if it is equal to the default value.
 
-	<p>Example
+<p>Example
 <pre>
 	------asnil-test.hxx----------------
-	class TCLASS{
-	       ....
-	 public:
-	  string menu;
-	  void item(string&name){
-	    int p,s;
-	    if((p=menu.find(name+":"))&lt;menu.length()){
-	      p=p+name.length()+1;
-	      s=menu.find(" ",p);
-	      name=menu.substr(p,s-p);
-	    }else name="";
-	  }
-	};
-	------asnil-test.pxx----------------
-	class TCLASS{
-	       ....
-	 public:
-	  string menu;
-	  void item(string&name="" asnil);
-	};
-	------asnil-test.lua----------------
-	require"asnil-test"
-	local t=TCLASS()
-	t.menu="first:call second:of third:cthulhu"
-	assert(t:item("first")=="call")
-	assert(t:item("second")=="of")
-	assert(t:item("third")=="cthulhu")
-	assert(t:item("fourth"==nil)
->------asnil-test.hxx----------------
 	class TCLASS{
 	       ....
 	 public:
@@ -163,4 +277,3 @@ toluaxx 2006
   <tr><td id=footer></td></tr>
 </table>
 </body>
-  

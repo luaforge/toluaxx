@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_declaration.lua,v 1.1.1.2 2006-10-25 10:55:51 phoenix11 Exp $
+-- $Id: tlx_declaration.lua,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -406,10 +406,17 @@ end
 -- Return parameter value
 function classDeclaration:retvalue ()
    if self.ret ~= '' then
+      --print(self.name,self.type,self.ptr)
       local t,ct = isbasic(self.type)
+      --print(t,ct)
       if t and t~='' then
 	 if self.def~='' and self.dnil then
-	    output('   if('..self.name..'=='..self.def..') tolua_pushnil(tolua_S);')
+	    output('   if('..self.name..'=='..self.def..')')
+	    if self.try_overload_nil then
+	       output('goto tolua_lerror;')
+	    else
+	       output('tolua_pushnil(tolua_S);')
+	    end
 	    output('   else tolua_push'..t..'(tolua_S,(',ct,')'..self.name..');')
 	 else
 	    output('   tolua_push'..t..'(tolua_S,(',ct,')'..self.name..');')
