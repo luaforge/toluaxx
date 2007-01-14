@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.3 2006-11-19 13:41:15 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.4 2007-01-14 11:21:06 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -552,6 +552,7 @@ TOLUA_API void tolua_open (lua_State* L){
     
     lua_pushstring(L,"tolua_super"); lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
     lua_pushstring(L,"tolua_gc");    lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
+    lua_pushstring(L,"tolua_node");  lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
     
     /* create proxy table */
     lua_pushstring(L,"tolua_proxy");
@@ -597,7 +598,7 @@ TOLUA_API void tolua_open (lua_State* L){
     tolua_function(L,"get",  tolua_bnd_proxy_get);
     tolua_function(L,"level",tolua_bnd_proxy_level);
     tolua_endmodule(L);
-
+    
     tolua_endmodule(L);
     tolua_endmodule(L);
   }

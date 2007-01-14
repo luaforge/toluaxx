@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.7 2006-11-19 13:41:15 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.8 2007-01-14 11:21:06 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -538,23 +538,29 @@ static int class_call_event(lua_State* L) {
     }
   }
   if (lua_isuserdata(L,1)) {           /* stack: obj {args} */
-    lua_pushvalue(L,1);                /* stack: obj {args} obj */
-    while (lua_getmetatable(L,-1)) {   /* stack: obj {args} obj mt */   /* Try metatables */
-      lua_remove(L,-2);                /* stack: obj {args} mt */
-      lua_pushstring(L,".callself");   /* stack: obj {args} mt name */
-      lua_rawget(L,-2);                /* stack: obj {args} mt func */
-      if (lua_isfunction(L,-1)) {      /* func is function? */
-	lua_insert(L,1);               /* stack: func obj {args} mt */
-	lua_settop(L,lua_gettop(L)-1); /* stack: func obj {args} */  /* args ={ nil key } */
-	/*DEBUG_STACK("prepare");*/
-	if(lua_gettop(L)==4&&lua_isnil(L,3))lua_insert(L,3); /* args ={ key nil } */
-	/*DEBUG_STACK("prep call");*/
-	lua_call(L,lua_gettop(L)-1,-1); /* stack: {rets} */   /* rets ={ nil key } */
-	/*if(lua_gettop(L)==2&&lua_isnil(L,2))lua_insert(L,1);*/ /* rets ={ key nil } */
-	/*DEBUG_STACK("post call");*/
-	return lua_gettop(L);          /* stack: {rets} */
+    /* for sub object calling: obj{prop1=val1, ...., propN=valN} */
+    if(lua_istable(L,2)&&(lua_gettop(L)==2||lua_isnil(L,3))){ /* check if two arg is lua table */
+      tolua_class_attribs_from_table(L); /* stack: obj tab */
+      return 0;
+    }else{
+      lua_pushvalue(L,1);                /* stack: obj {args} obj */
+      while (lua_getmetatable(L,-1)) {   /* stack: obj {args} obj mt */   /* Try metatables */
+	lua_remove(L,-2);                /* stack: obj {args} mt */
+	lua_pushstring(L,".callself");   /* stack: obj {args} mt name */
+	lua_rawget(L,-2);                /* stack: obj {args} mt func */
+	if (lua_isfunction(L,-1)) {      /* func is function? */
+	  lua_insert(L,1);               /* stack: func obj {args} mt */
+	  lua_settop(L,lua_gettop(L)-1); /* stack: func obj {args} */  /* args ={ nil key } */
+	  /*DEBUG_STACK("prepare");*/
+	  if(lua_gettop(L)==4&&lua_isnil(L,3))lua_insert(L,3); /* args ={ key nil } */
+	  /*DEBUG_STACK("prep call");*/
+	  lua_call(L,lua_gettop(L)-1,-1); /* stack: {rets} */   /* rets ={ nil key } */
+	  /*if(lua_gettop(L)==2&&lua_isnil(L,2))lua_insert(L,1);*/ /* rets ={ key nil } */
+	  /*DEBUG_STACK("post call");*/
+	  return lua_gettop(L);          /* stack: {rets} */
+	}
+	lua_settop(L,3);                 /* stack: obj {args} mt */
       }
-      lua_settop(L,3);                 /* stack: obj {args} mt */
     }
   }
   tolua_error(L,"Attempt to call a non-callable object.",NULL);

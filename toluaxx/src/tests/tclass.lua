@@ -103,6 +103,10 @@ e:set_ptr(e)
 local ve = tolua.cast(e:get_ptr(), "Test::Tst_E")
 ve:set_ptr(ve)
 
+local c=Test.luaC(0)
+c{number=11,i=18}
+assert(c.number+c.i==40)
+
 print"1"
 Test.A.pete = {}
 print"2"

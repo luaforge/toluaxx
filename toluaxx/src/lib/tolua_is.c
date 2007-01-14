@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_is.c,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
+** $Id: tolua_is.c,v 1.3 2007-01-14 11:21:06 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -206,7 +206,8 @@ TOLUA_API int tolua_isstring (lua_State* L, int lo, int def, tolua_Error* err){
   if (def && lua_gettop(L)<abs(lo)) return 1;
   NIL_AS_NOVALUE;
   //if (lua_isnil(L,lo) || lua_isstring(L,lo)) return 1;
-  if (!lua_isnumber(L,lo) && lua_isstring(L,lo)) return 1;
+  if (lua_isstring(L,lo)) return 1;
+  //if (!lua_isnumber(L,lo) && lua_isstring(L,lo)) return 1;
   err->index = lo;
   err->array = 0;
   err->type = "string";

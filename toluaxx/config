@@ -30,6 +30,5 @@ COMPILER=gcc
 #COMPILER=mingw
 #COMPILER=msvs
 
-LIB.STATIC=enable
-LIB.SHARED=disable
+LIB.STATIC=disable
 LIB.SHARED=enable
