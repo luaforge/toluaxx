@@ -55,7 +55,7 @@ L.l=$(addprefix -l,$(1))   # Add libs
 L.n=lib$(1)
 
 # Binder
-CB=bin/toluaxx5.1.$(RXT) -o $(2) $(1)
+CB=export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./lib; bin/toluaxx5.1.$(RXT) -o $(2) $(1)
 
 # Utils
 ECHO=echo
@@ -68,6 +68,7 @@ LN=ln -s
 # Internal options
 CFLAGS.I+=$(INC.PATH)
 LOPTS.L+=lib
+LOPTS.l+=dl m
 
 # Lua5.1 options
 ifeq ($(PKGCONFIG),enable)
