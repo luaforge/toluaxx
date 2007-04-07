@@ -3,7 +3,7 @@
 ** Written by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: main.cxx,v 1.1.1.2 2006-10-25 10:55:38 phoenix11 Exp $
+** $Id: main.cxx,v 1.2 2007-04-07 09:52:56 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -31,24 +31,29 @@ void add_extra(lua_State* L,string v){
 int main(int argc, char* argv[]){
 
   PARSECMD c(argc,argv);
-
-  c("version",     "-v|--version");
+  c("version",     "-v|--version"         );
   c("output",      "-o|--output",     true);
   c("header",      "-H|--header",     true);
   c("pkgname",     "-n|--pkgname",    true);
-  c("parseonly",   "-p|--parseonly");
-  c("parseinfo",   "-P|--parseinfo");
-  c("nostdtring",  "-S|--nostdstring");
-  c("subst1index", "-1|--subst1index");
+  c("parseonly",   "-p|--parseonly"       );
+  c("parseinfo",   "-P|--parseinfo"       );
+  c("nostdtring",  "-S|--nostdstring"     );
+  c("subst1index", "-1|--subst1index"     );
   c("luafile",     "-L|--luafile",    true);
-  c("noautodest",  "-D|--noautodest");
-  c("nowarnings",  "-W|--nowarnings");
-  c("nocleanup",   "-C|--nocleanup");
+  c("noautodest",  "-D|--noautodest"      );
+  c("nowarnings",  "-W|--nowarnings"      );
+  c("nocleanup",   "-C|--nocleanup"       );
   c("extraval",    "-E|--extra",      true);
-  c("typeidlist",  "-t|--typeidlist");
-  c("help",        "-h|--help");
-
+  c("typeidlist",  "-t|--typeidlist"      );
+  c("help",        "-h|--help"            );
+  c(                                      );
+  
   //cout<<c.cnstr();
+  
+  for(int i=0;i<(*c).size();i++){
+    cout<<"Warning: unrecognized option `"<<(*c)[i]<<"`.."<<endl;
+  }
+
   if(c("version")){
     cout<<version();
     return 0;

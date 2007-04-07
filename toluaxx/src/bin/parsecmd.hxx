@@ -3,7 +3,7 @@
 ** Written by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: parsecmd.hxx,v 1.1.1.2 2006-10-25 10:55:38 phoenix11 Exp $
+** $Id: parsecmd.hxx,v 1.2 2007-04-07 09:52:56 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -25,18 +25,30 @@ class PARSECMD{
   POOL arg;
   CORT&line;
   CORT&exec;
+  CORT unrec;
   ITER iter;
  public:
-  PARSECMD(int argc,char **argv); // Parse cmd line
-  bool operator()(string name); // Test existing arg
-  void operator()(string name, string argum, bool value=false); // Parse arg
-  CORT&operator[](string name); // Get arg value
+  
+  void parse(int argc,char **argv); // Parse cmd line
+  void cast(string name, string argum, bool value=false); // cast arg
+  void final(); // finalize casting
+  bool exist(string name); // arg existing
   string cnstr();
   string next();
   bool begin();
   bool end();
+  
+  PARSECMD(int argc,char **argv):exec(arg["exec"]),line(arg["line"]){parse(argc,argv);}
+
+  inline void operator()(int argc,char **argv){parse(argc,argv);}
+  inline bool operator()(string name){return exist(name);}
+  inline void operator()(string name, string argum, bool value=false)
+  {return cast(name,argum,value);}
+  inline CORT&operator[](string name){return arg[name];} // arg value
+  inline CORT&operator*(){return unrec;} // unrecognized options
   inline void operator--(){begin();}
   inline string operator++(){return next();}
   inline bool operator!(){return !end();}
+  inline void operator ()(){final();} // finalize
 };
 

@@ -3,7 +3,7 @@
 ** Written by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: parsecmd.cxx,v 1.1.1.2 2006-10-25 10:55:38 phoenix11 Exp $
+** $Id: parsecmd.cxx,v 1.2 2007-04-07 09:52:56 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -26,7 +26,7 @@ bool PARSECMD::end(){
   return iter==arg.end();
 }
 
-PARSECMD::PARSECMD(int argc,char **argv):exec(arg["exec"]),line(arg["line"]){ // Parse cmd line
+void PARSECMD::parse(int argc,char **argv){ // Parse cmd line
   exec.push_back(argv[0]);
   {
     int bt=exec[0].rfind("/");
@@ -37,11 +37,11 @@ PARSECMD::PARSECMD(int argc,char **argv):exec(arg["exec"]),line(arg["line"]){ //
   }
   for(unsigned int i=1;i<argc;i++)line.push_back(argv[i]);
 }
-bool PARSECMD::operator()(string name){
+bool PARSECMD::exist(string name){
   if(arg.find(name)!=arg.end())return true;
   return false;
 }
-void PARSECMD::operator()(string name,string cmd,bool value){
+void PARSECMD::cast(string name,string cmd,bool value){
   if(name==""||cmd=="")return;
   vector<string> cmdv;
   {
@@ -53,34 +53,36 @@ void PARSECMD::operator()(string name,string cmd,bool value){
     unsigned int cmdi,wrdi;
     for(cmdi=0;cmdi<cmdv.size();cmdi++){
       for(wrdi=0;wrdi<line.size();wrdi++){
-	unsigned int one,two=cmdv[cmdi].length();
-	if((one=line[wrdi].find(cmdv[cmdi]))<two){
-	  arg[name];
+	if(line[wrdi].substr(0,cmdv[cmdi].length())==cmdv[cmdi]&&value||line[wrdi]==cmdv[cmdi]){
+	  CORT&c=arg[name];
 	  if(value){
-	    if(two<line[wrdi].length()){
-	      arg[name].push_back(line[wrdi].substr(one));
+	    if(line[wrdi].length()>cmdv[cmdi].length()){
+	      c.push_back(line[wrdi].substr(cmdv[cmdi].length()));
+	      if(c.back()[0]=='=')c.back().erase(0,1);
 	    }else{
-	      if(wrdi+1<line.size()){
-	        arg[name].push_back(line[wrdi+1]);
-	        line[wrdi+1]="";
+	      if((wrdi+1)<line.size()){
+		c.push_back(line[wrdi+1]);
+		line[wrdi+1]="";
 	      }
 	    }
 	  }
 	  line[wrdi]="";
 	}
       }
-    }
-    for(int i=0;i<line.size();i++){
-      if(line[i]==""){
-	line.erase(line.begin()+i);
-      }
-    }
+    } 
   }
 }
-vector<string>&PARSECMD::operator[](string name){
-  //if(arg.find(name)!=arg.end())return arg[name];
-  //return line;
-  return arg[name];
+void PARSECMD::final(){
+  for(int i=0;i<line.size();i++){
+    if(line[i][0]=='-'){
+      unrec.push_back(line[i].substr(0,line[i].find("=")));
+      line[i]="";
+    }
+    if(line[i]==""){
+      line.erase(line.begin()+i);
+      i--;
+    }
+  }
 }
 string PARSECMD::cnstr(){
   string ret;
