@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_container.lua,v 1.4 2006-11-09 21:22:02 phoenix11 Exp $
+-- $Id: tlx_container.lua,v 1.5 2007-04-07 13:18:09 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -789,7 +789,29 @@ function classContainer:doparse (s)
 	 return strsub(s,e+1)
       end
    end
-
+   
+   -->>>>--------------------------------------------------------------------->>>>--
+   -- adding this (KS)
+   -- try function pointers with and without class prepended
+   do
+      local pat = "^%s*([^%(\n]+)%s*(%b())(%b())%s*(c?o?n?s?t?)%s*;%s*"
+      local b,e,type, decl, args, const = strfind(s, pat)
+      if b then
+	 local pat2 = "^%(%s*([^%(\n]+)%s*:?:?%s*%*%s*([^%(\n]+)%)"
+	 local b2, e2, class, name = strfind(decl, pat2)	
+	 if not b2 then
+	    b2, e2, name = strfind(decl, "%(%*%s*([^%(\n]+)%)")
+	    class = ""
+	 end
+	 
+	 if b2 then
+	    return strsub(s, e+1)
+	 end
+      end
+   end
+   -- end adding
+   --<<<<---------------------------------------------------------------------<<<<--
+   
    -- no matching
    if gsub(s,"%s%s*","") ~= "" then
       _curr_code = s

@@ -3,7 +3,7 @@
 -- TeCGraf/PUC-Rio
 -- Jul 1998
 -- Last update: Apr 2003
--- $Id: tlx_basic.lua,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
+-- $Id: tlx_basic.lua,v 1.3 2007-04-07 13:18:09 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -42,6 +42,7 @@ _basic_ctype = {
    boolean = "bool",
    value = "int",
    state = "lua_State*",
+   pointer = "int", -- added (KS)
 }
 
 -- functions the are used to do a 'raw push' of basic types

@@ -3,7 +3,7 @@
 ** Written by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: main.cxx,v 1.2 2007-04-07 09:52:56 phoenix11 Exp $
+** $Id: main.cxx,v 1.3 2007-04-07 13:18:09 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -50,24 +50,15 @@ int main(int argc, char* argv[]){
   
   //cout<<c.cnstr();
   
-  for(int i=0;i<(*c).size();i++){
-    cout<<"Warning: unrecognized option `"<<(*c)[i]<<"`.."<<endl;
-  }
+  for(int i=0;i<(*c).size();i++)cout<<"Warning: unrecognized option `"<<(*c)[i]<<"`.."<<endl;
 
-  if(c("version")){
-    cout<<version();
-    return 0;
-  }
-  if(c("help")){
-    cout<<help();
-    return 0;
-  }
-  for(int i=0;i<c["line"].size();i++)if(c["line"][i].find("-")!=0)c["input"].push_back(c["line"][i]);
-  //if(c["line"].size()>0)c["input"].push_back(c["line"][0]);
-  if(!c("input")){
-    cout<<usage();
-    return 0;
-  }
+  if(c("version")){cout<<version();return 0;}
+  if(c("help")){cout<<help();return 0;}
+  
+  for(int i=0;i<c["line"].size();c["input"].push_back(c["line"][i]),i++);
+  
+  if(!c("input")){cout<<usage();return 0;}
+  
   {
 #  if LUA_VERSION_NUM >= 501 /* lua 5.1 */
     lua_State* L=luaL_newstate();

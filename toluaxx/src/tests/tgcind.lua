@@ -16,6 +16,11 @@ print("g1.o2=OBJ()",g1.o2)
 collectgarbage"collect"
 print(collectgarbage"count")
 
+for i=0,100 do
+  collectgarbage"collect"
+  print(collectgarbage"count")
+end
+
 g1.o1=nil
 print("g1.o1=nil",g1.o1)
 

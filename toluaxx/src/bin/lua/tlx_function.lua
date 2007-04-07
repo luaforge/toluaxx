@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_function.lua,v 1.5 2006-11-23 19:43:54 phoenix11 Exp $
+-- $Id: tlx_function.lua,v 1.6 2007-04-07 13:18:09 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -197,7 +197,7 @@ function classFunction:supcode (local_constructor)
 	 else
 	    if self.cast_operator then
 	       output('static_cast<',self.mod,self.type,self.ptr,'>(*self')
-	    else
+	    else 
 	       output('self->'..self.name,'(')
 	    end
 	 end

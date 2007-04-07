@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_declaration.lua,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
+-- $Id: tlx_declaration.lua,v 1.3 2007-04-07 13:18:09 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -272,6 +272,7 @@ function classDeclaration:builddeclaration (narg, cplusplus)
 	 if t == 'number' and string.find(self.ptr, "%*") then
 	    t = 'userdata'
 	 end
+	 
 	 if not t and ptr=='' then line = concatparam(line,'*') end
 	 line = concatparam(line,'((',self.mod,type)
 	 if not t then

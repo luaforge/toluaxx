@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_feature.lua,v 1.2 2006-11-09 21:22:02 phoenix11 Exp $
+-- $Id: tlx_feature.lua,v 1.3 2007-04-07 13:18:09 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -89,28 +89,34 @@ end
 -- check if feature is inside a container definition
 -- it returns the container class name or nil.
 function classFeature:incontainer (which)
- if self.parent then
-  local parent = self.parent
-  while parent do
-   if parent.classtype == which then
-    return parent.name
+   if self.parent then
+      local parent = self.parent
+      while parent do
+	 if parent.classtype == which then
+	    return parent.name
+	 end
+	 parent = parent.parent
+      end
    end
-   parent = parent.parent
-  end
- end
- return nil
+   return nil
 end
 
-function classFeature:inclass ()
- return self:incontainer('class')
+-->>-- adding (KS) -->>--
+function classFeature:instruct()
+   return self:incontainer('struct')
+end
+--<<-- end adding (KS) --<<--
+
+function classFeature:inclass()
+   return self:incontainer('class')
 end
 
-function classFeature:inmodule ()
- return self:incontainer('module')
+function classFeature:inmodule()
+   return self:incontainer('module')
 end
 
-function classFeature:innamespace ()
- return self:incontainer('namespace')
+function classFeature:innamespace()
+   return self:incontainer('namespace')
 end
 
 -- return C binding function name based on name
