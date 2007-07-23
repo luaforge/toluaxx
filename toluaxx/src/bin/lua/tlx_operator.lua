@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_operator.lua,v 1.3 2006-11-09 21:22:02 phoenix11 Exp $
+-- $Id: tlx_operator.lua,v 1.4 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -15,7 +15,7 @@
 -- It stores the same fields as functions do plus:
 --  kind = set of character representing the operator (as it appers in C++ code)
 classOperator = {
- kind = '',
+   kind = '',
 }
 classOperator.__index = classOperator
 setmetatable(classOperator,classFunction)
@@ -71,7 +71,7 @@ function classOperator:supcode_tmp()
    -- -- if not _TM[self.kind] then
    -- ++ <<
    if not _TM[self.kind] and not _TM0[self.kind] then
-   -- ++ >>
+      -- ++ >>
       return classFunction.supcode(self)
    end
    
@@ -179,11 +179,11 @@ function Operator (d,k,a,c,r)
    --if string.find(k, "^[%w_:%d<>%*%&]+$") then
    if d == "operator" and k ~= '' then
       d = k.." operator"
-   -- --elseif not _TM[op_k] then
-   -- ++ <<
+      -- --elseif not _TM[op_k] then
+      -- ++ <<
    elseif not _TM[op_k] and not _TM0[op_k] then
-   -- ++ >>
-      if flags['W'] then
+      -- ++ >>
+      if flags.nowarnings then
 	 --error("tolua: no support for operator" .. f.kind)
 	 error("tolua: no support for operator" .. op_k)
       else
@@ -249,7 +249,7 @@ function Operator (d,k,a,c,r)
    -- -- if not _TM[f.kind] then
    -- ++ <<
    if not _TM[f.kind] and not _TM0[f.kind] then
-   -- ++ >>
+      -- ++ >>
       f.cast_operator = true
    end
    if f.kind == '[]' and ref=='&' and f.const~='const' then

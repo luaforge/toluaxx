@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_to.c,v 1.1.1.2 2006-10-25 10:56:48 phoenix11 Exp $
+** $Id: tolua_to.c,v 1.2 2007-07-23 18:57:29 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -22,11 +22,9 @@
 TOLUA_API double tolua_tonumber (lua_State* L, int narg, double def){
   return lua_gettop(L)<abs(narg) NIL_AS_NOVALUE ? def : lua_tonumber(L,narg);
 }
-
 TOLUA_API const char* tolua_tostring (lua_State* L, int narg, const char* def){
   return lua_gettop(L)<abs(narg) NIL_AS_NOVALUE ? def : lua_tostring(L,narg);
 }
-
 TOLUA_API void* tolua_touserdata (lua_State* L, int narg, void* def){
   /* return lua_gettop(L)<abs(narg) ? def : lua_touserdata(L,narg); */
   if (lua_gettop(L)<abs(narg) NIL_AS_NOVALUE) {
@@ -37,9 +35,7 @@ TOLUA_API void* tolua_touserdata (lua_State* L, int narg, void* def){
   }
   return tolua_tousertype(L, narg, def);
 }
-
 extern int push_table_instance(lua_State* L, int lo);
-
 TOLUA_API void* tolua_tousertype (lua_State* L, int narg, void* def){
   if (lua_gettop(L)<abs(narg) NIL_AS_NOVALUE) return def;
   else {
@@ -51,15 +47,12 @@ TOLUA_API void* tolua_tousertype (lua_State* L, int narg, void* def){
     return (u==NULL) ? NULL : *((void**)u); /* nil represents NULL */
   }
 }
-
 TOLUA_API int tolua_tovalue (lua_State* L, int narg, int def) {
   return lua_gettop(L)<abs(narg) NIL_AS_NOVALUE ? def : narg;
 }
-
 TOLUA_API int tolua_toboolean (lua_State* L, int narg, int def) {
   return lua_gettop(L)<abs(narg) NIL_AS_NOVALUE ? def : lua_toboolean(L,narg);
 }
-
 TOLUA_API double tolua_tofieldnumber (lua_State* L, int lo, int index, double def) {
   double v;
   lua_pushnumber(L,index);
@@ -68,7 +61,6 @@ TOLUA_API double tolua_tofieldnumber (lua_State* L, int lo, int index, double de
   lua_pop(L,1);
   return v;
 }
-
 TOLUA_API const char* tolua_tofieldstring (lua_State* L, int lo, int index, const char* def) {
   const char* v;
   lua_pushnumber(L,index);
@@ -77,7 +69,6 @@ TOLUA_API const char* tolua_tofieldstring (lua_State* L, int lo, int index, cons
   lua_pop(L,1);
   return v;
 }
-
 TOLUA_API void* tolua_tofielduserdata (lua_State* L, int lo, int index, void* def) {
   void* v;
   lua_pushnumber(L,index);
@@ -86,7 +77,6 @@ TOLUA_API void* tolua_tofielduserdata (lua_State* L, int lo, int index, void* de
   lua_pop(L,1);
   return v;
 }
-
 TOLUA_API void* tolua_tofieldusertype (lua_State* L, int lo, int index, void* def) {
   void* v;
   lua_pushnumber(L,index);
@@ -95,7 +85,6 @@ TOLUA_API void* tolua_tofieldusertype (lua_State* L, int lo, int index, void* de
   lua_pop(L,1);
   return v;
 }
-
 TOLUA_API int tolua_tofieldvalue (lua_State* L, int lo, int index, int def) {
   int v;
   lua_pushnumber(L,index);
@@ -104,7 +93,6 @@ TOLUA_API int tolua_tofieldvalue (lua_State* L, int lo, int index, int def) {
   lua_pop(L,1);
   return v;
 }
-
 TOLUA_API int tolua_getfieldboolean (lua_State* L, int lo, int index, int def) {
   int v;
   lua_pushnumber(L,index);

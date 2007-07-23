@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_function.lua,v 1.6 2007-04-07 13:18:09 phoenix11 Exp $
+-- $Id: tlx_function.lua,v 1.7 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -170,7 +170,7 @@ function classFunction:supcode (local_constructor)
    if class and self.name=='delete' then
       output('  delete self;')
    elseif class and self.name == 'operator&[]' then
-      if flags['1'] then -- for compatibility with tolua5 ?
+      if flags.subst1index then -- for compatibility with tolua5 ?
 	 output('  self->operator[](',self.args[1].name,'-1) = ',self.args[2].name,';')
       else
 	 output('  self->operator[](',self.args[1].name,') = ',self.args[2].name,';')
@@ -221,7 +221,7 @@ function classFunction:supcode (local_constructor)
 	 end
       end
       
-      if class and self.name == 'operator[]' and flags['1'] then
+      if class and self.name == 'operator[]' and flags.subst1index then
 	 output('-1);')
       else
 	 output(');')
@@ -479,7 +479,7 @@ end
 function Function (d,a,c,r)
    --local t = split(strsub(a,2,-2),',') -- eliminate braces
    --local t = split_params(strsub(a,2,-2))
-   if not flags['W'] and string.find(a, "%.%.%.%s*%)") then
+   if not flags.nowarnings and string.find(a, "%.%.%.%s*%)") then
       warning("Functions with variable arguments (`...') are not supported. Ignoring "..d..a..c)
       return nil
    end
@@ -487,7 +487,7 @@ function Function (d,a,c,r)
    r=r or ""
    local i=1
    local l = {n=0}
-
+   
    a = string.gsub(a, "%s*([%(%)])%s*", "%1")
    local t,strip,last = strip_pars(strsub(a,2,-2));
    if strip then

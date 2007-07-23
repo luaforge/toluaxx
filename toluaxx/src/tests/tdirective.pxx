@@ -9,7 +9,7 @@ $<
 $>
 
 $[
-A = 4
+ A = 4
 $]
 
 $lfile"idirective.lua"

@@ -1,42 +1,49 @@
-
+require"base"
 require"marray"
 
 init()
 
+t=tolua.test("toluaxx","Array test","phoenix11")
+
 for i=0,9 do
-   assert(a[i]==i)
+   t(a[i],i,"a[i]==i i="..tostring(i))
 end
 
 for i=1,9 do
-   assert(p[i-1].y==p[i].x)
+   t(p[i-1].y,p[i].x,"p[i-1].y==p[i].x i="..tostring(i))
 end
 
 for i=0,9 do
-   assert(M.a[i]==i)
+   t(M.a[i],i,"M.a[i]==i i="..tostring(i))
 end
 
 for i=1,9 do
-   assert(M.p[i-1].y==M.p[i].x)
+   t(M.p[i-1].y,M.p[i].x,"M.p[i-1].y==M.p[i].x i="..tostring(i))
 end
 
 for i=0,9 do
-   assert(pp[i].x==M.p[i].x and p[i].y == M.pp[i].y)
+   t(pp[i].x,M.p[i].x,"pp[i].x==M.p[i].x i="..tostring(i))
+   t(p[i].y,M.pp[i].y,"p[i].y==M.pp[i].y i="..tostring(i))
 end
 
 for i=0,9 do
-   assert(array.a[i] == parray.a[i])
-   assert(array.p[i].x == parray.pp[i].x and array.p[i].y == parray.pp[i].y)
+   t(array.a[i],parray.a[i],"array.a[i]==parray.a[i] i="..tostring(i))
+   t(array.p[i].x,parray.pp[i].x,"array.p[i].x==parray.pp[i].x i="..tostring(i))
+   t(array.p[i].y,parray.pp[i].y,"array.p[i].y==parray.pp[i].y i="..tostring(i))
 end
 
 for i=0,9 do
-   array.a[i] = a[9-i]
-   M.a[i] = 9-i
-   assert(array.a[i]==M.a[i])
+   array.a[i]=a[9-i]
+   M.a[i]=9-i
+   t(array.a[i],M.a[i],"array.a[i]==M.a[i] i="..tostring(i))
 end
 
 for i=1,9 do
    array.p[i] = array.pp[0]
-   assert(array.p[i].x==0 and array.p[i].y==1)
+   t(array.p[i].x,false,"array.p[i].x==0 i="..tostring(i))
+   t(array.p[i].y,1,"array.p[i].y==1 i="..tostring(i))
 end
 
-print("Array test OK")
+--print(t.result)
+--print(t.errors)
+print(t.report)

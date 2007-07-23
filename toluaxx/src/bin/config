@@ -12,16 +12,18 @@
 
 bin.name=$(RUN.NAME)
 bin.state=enable
-bin.runable=enable
+#bin.runable=enable # deprecated
+bin.lunable=enable
 bin.static=disable
 bin.shared=disable
-bin.dep=lib
-bin.libs=$(LIB.NAME)
+bin.dep=lib # deprecated
+#bin.libs=$(LIB.NAME)
+bin.lfile=lua/tlx_all.lua
 
 ifeq ($(DEBUG),disable)
   BIND=enable
 else
-bin.postpare: src/bin/toluaxx.bind.cxx
+#bin.postpare: src/bin/toluaxx.bind.cxx # deprecated
 endif
 
 ifeq ($(SYMLINK),enable)

@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_verbatim.lua,v 1.1.1.2 2006-10-25 10:56:08 phoenix11 Exp $
+-- $Id: tlx_verbatim.lua,v 1.2 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -16,63 +16,61 @@
 -- The following filds are stored:
 --   line = line text
 classVerbatim = {
- line = '',
-	cond = nil,    -- condition: where to generate the code (s=suport, r=register)
+   line = '',
+   cond = nil,    -- condition: where to generate the code (s=suport, r=register)
 }
 classVerbatim.__index = classVerbatim
 setmetatable(classVerbatim,classFeature)
 
 -- preamble verbatim
 function classVerbatim:preamble ()
- if self.cond == '' then
-  write(self.line)
- end
+   if self.cond == '' then
+      write(self.line)
+   end
 end
 
 -- support code
 function classVerbatim:supcode ()
- if strfind(self.cond,'s') then
-  write(self.line)
-  write('\n')
- end
+   if strfind(self.cond,'s') then
+      write(self.line)
+      write('\n')
+   end
 end
 
 -- register code
 function classVerbatim:register (pre)
- if strfind(self.cond,'r') then
-  write(self.line)
- end
+   if strfind(self.cond,'r') then
+      write(self.line)
+   end
 end
 
 
 -- Print method
 function classVerbatim:print (ident,close)
- print(ident.."Verbatim{")
- print(ident.." line = '"..self.line.."',")
- print(ident.."}"..close)
+   print(ident.."Verbatim{")
+   print(ident.." line = '"..self.line.."',")
+   print(ident.."}"..close)
 end
 
 
 -- Internal constructor
 function _Verbatim (t)
- setmetatable(t,classVerbatim)
- append(t)
- return t
+   setmetatable(t,classVerbatim)
+   append(t)
+   return t
 end
 
 -- Constructor
 -- Expects a string representing the text line
 function Verbatim (l,cond)
- if strsub(l,1,1) == "'" then
-  l = strsub(l,2)
- elseif strsub(l,1,1) == '$' then
-  cond = 'sr'       -- generates in both suport and register fragments
-  l = strsub(l,2)
- end
- return _Verbatim {
-  line = l,
-  cond = cond or '',
- }
+   if strsub(l,1,1) == "'" then
+      l = strsub(l,2)
+   elseif strsub(l,1,1) == '$' then
+      cond = 'sr'       -- generates in both suport and register fragments
+      l = strsub(l,2)
+   end
+   return _Verbatim {
+      line = l,
+      cond = cond or '',
+   }
 end
-
-

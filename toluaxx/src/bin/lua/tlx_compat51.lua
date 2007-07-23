@@ -1,32 +1,33 @@
+
 if string.find(_VERSION, "5%.0") then
-	return
+   return
 end
 
 -- "loadfile"
 local function pp_dofile(path)
 
-	local loaded = false
-	local getfile = function()
+   local loaded = false
+   local getfile = function()
 
-		if loaded then
-			return
-		else
-			local file,err = io.open(path)
-			if not file then
-				error("error loading file "..path..": "..err)
-			end
-			local ret = file:read("*a")
-			file:close()
+		      if loaded then
+			 return
+		      else
+			 local file,err = io.open(path)
+			 if not file then
+			    error("error loading file "..path..": "..err)
+			 end
+			 local ret = file:read("*a")
+			 file:close()
 
-			ret = string.gsub(ret, "%.%.%.%s*%)", "...) local arg = {n=select('#', ...), ...};")
+			 ret = string.gsub(ret, "%.%.%.%s*%)", "...) local arg = {n=select('#', ...), ...};")
 
-			loaded = true
-			return ret
-		end
-	end
+			 loaded = true
+			 return ret
+		      end
+		   end
 
-	local f = load(getfile, path)
-	return f()
+   local f = load(getfile, path)
+   return f()
 end
 
 old_dofile = dofile
@@ -37,17 +38,13 @@ dofile = pp_dofile
 --[[
 local ogsub = string.gsub
 local function compgsub(a,b,c,d)
-  if type(c) == "function" then
-    local oc = c
-    c = function (...) return oc(...) or '' end
-  end
-  return ogsub(a,b,c,d)
+   if type(c) == "function" then
+      local oc = c
+      c = function (...) return oc(...) or '' end
+   end
+   return ogsub(a,b,c,d)
 end
 string.repl = ogsub
 --]]
 
 --string.gsub = compgsub
-
-
-
-

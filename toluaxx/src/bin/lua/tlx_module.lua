@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_module.lua,v 1.1.1.2 2006-10-25 10:55:43 phoenix11 Exp $
+-- $Id: tlx_module.lua,v 1.2 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -16,53 +16,53 @@
 -- The following fields are stored:
 --    {i} = list of objects in the module.
 classModule = {
- classtype = 'module'
+   classtype = 'module'
 }
 classModule.__index = classModule
 setmetatable(classModule,classContainer)
 
 -- register module
 function classModule:register (pre)
- pre = pre or ''
- push(self)
- output(pre..'tolua_module(tolua_S,"'..self.name..'",',self:hasvar(),');')
- output(pre..'tolua_beginmodule(tolua_S,"'..self.name..'");')
- local i=1
- while self[i] do
-  self[i]:register(pre..' ')
-  i = i+1
- end
- output(pre..'tolua_endmodule(tolua_S);')
-	pop()
+   pre = pre or ''
+   push(self)
+   output(pre..'tolua_module(tolua_S,"'..self.name..'",',self:hasvar(),');')
+   output(pre..'tolua_beginmodule(tolua_S,"'..self.name..'");')
+   local i=1
+   while self[i] do
+      self[i]:register(pre..' ')
+      i = i+1
+   end
+   output(pre..'tolua_endmodule(tolua_S);')
+   pop()
 end
 
 -- Print method
 function classModule:print (ident,close)
- print(ident.."Module{")
- print(ident.." name = '"..self.name.."';")
- local i=1
- while self[i] do
-  self[i]:print(ident.." ",",")
-  i = i+1
- end
- print(ident.."}"..close)
+   print(ident.."Module{")
+   print(ident.." name = '"..self.name.."';")
+   local i=1
+   while self[i] do
+      self[i]:print(ident.." ",",")
+      i = i+1
+   end
+   print(ident.."}"..close)
 end
 
 -- Internal constructor
 function _Module (t)
- setmetatable(t,classModule)
- append(t)
- return t
+   setmetatable(t,classModule)
+   append(t)
+   return t
 end
 
 -- Constructor
 -- Expects two string representing the module name and body.
 function Module (n,b)
- local t = _Module(_Container{name=n})
- push(t)
- t:parse(strsub(b,2,strlen(b)-1)) -- eliminate braces
- pop()
- return t
+   local t = _Module(_Container{name=n})
+   push(t)
+   t:parse(strsub(b,2,strlen(b)-1)) -- eliminate braces
+   pop()
+   return t
 end
 
 

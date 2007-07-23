@@ -9,6 +9,11 @@ VERSION=5.1
 ## for posix [/usr]
 # PREFIX=
 
+## Features
+## <feature>
+#DISABLE=TEST_FRAMEWORK
+#ENABLE=DEBUG_STACK
+
 ## Debug mode
 ## [enable|disable]
 DEBUG=enable

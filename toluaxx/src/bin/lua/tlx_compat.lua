@@ -33,11 +33,11 @@
 rawtype = type
 
 function do_ (f, err)
-  if not f then print(err); return end
-  local a,b = pcall(f)
-  if not a then print(b); return nil
-  else return b or true
-  end
+   if not f then print(err); return end
+   local a,b = pcall(f)
+   if not a then print(b); return nil
+   else return b or true
+   end
 end
 
 function dostring(s) return do_(loadstring(s)) end
@@ -140,54 +140,54 @@ closefile = io.close
 openfile = io.open
 
 function flush (f)
-  if f then f:flush()
-  else _OUTPUT:flush()
-  end
+   if f then f:flush()
+   else _OUTPUT:flush()
+   end
 end
 
 function readfrom (name)
-  if name == nil then
-    local f, err, cod = io.close(_INPUT)
-    _INPUT = io.stdin
-    return f, err, cod
-  else
-    local f, err, cod = io.open(name, "r")
-    _INPUT = f or _INPUT
-    return f, err, cod
-  end
+   if name == nil then
+      local f, err, cod = io.close(_INPUT)
+      _INPUT = io.stdin
+      return f, err, cod
+   else
+      local f, err, cod = io.open(name, "r")
+      _INPUT = f or _INPUT
+      return f, err, cod
+   end
 end
 
 function writeto (name)
-  if name == nil then
-    local f, err, cod = io.close(_OUTPUT)
-    _OUTPUT = io.stdout
-    return f, err, cod
-  else
-    local f, err, cod = io.open(name, "w")
-    _OUTPUT = f or _OUTPUT
-    return f, err, cod
-  end
+   if name == nil then
+      local f, err, cod = io.close(_OUTPUT)
+      _OUTPUT = io.stdout
+      return f, err, cod
+   else
+      local f, err, cod = io.open(name, "w")
+      _OUTPUT = f or _OUTPUT
+      return f, err, cod
+   end
 end
 
 function appendto (name)
-  local f, err, cod = io.open(name, "a")
-  _OUTPUT = f or _OUTPUT
-  return f, err, cod
+   local f, err, cod = io.open(name, "a")
+   _OUTPUT = f or _OUTPUT
+   return f, err, cod
 end
 
 function read (...)
-  local f = _INPUT
-  if rawtype(arg[1]) == 'userdata' then
-    f = tab.remove(arg, 1)
-  end
-  return f:read(unpack(arg))
+   local f = _INPUT
+   if rawtype(arg[1]) == 'userdata' then
+      f = tab.remove(arg, 1)
+   end
+   return f:read(unpack(arg))
 end
 
 function write (...)
-  local f = _OUTPUT
-  if rawtype(arg[1]) == 'userdata' then
-    f = tab.remove(arg, 1)
-  end
-  return f:write(unpack(arg))
+   local f = _OUTPUT
+   if rawtype(arg[1]) == 'userdata' then
+      f = tab.remove(arg, 1)
+   end
+   return f:write(unpack(arg))
 end
 

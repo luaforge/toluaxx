@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: toluaxx.h,v 1.5 2006-11-23 19:43:54 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.6 2007-07-23 18:57:29 phoenix11 Exp $
 */
 
 /*
@@ -12,7 +12,7 @@
 ** Modernized by Phoenix IV
 ** RareSky/Community
 ** Sep 2006
-** $Id: toluaxx.h,v 1.5 2006-11-23 19:43:54 phoenix11 Exp $
+** $Id: toluaxx.h,v 1.6 2007-07-23 18:57:29 phoenix11 Exp $
 **
 */
 
@@ -34,24 +34,21 @@
 #    endif
 #  endif
 
-#  define TOLUA_VERSION "toluaxx-1.1.0"
+#  define TOLUA_VERSION "toluaxx-1.1.4"
+
 
 #  ifdef __cplusplus
 extern "C" {
 #  endif
-
-#ifdef DEBUG_MODE
-#  define DEBUG_STACK(msg) {						\
-    int i;								\
-    printf("Operation `%s`\n",#msg);					\
-    printf("  Stack {\n");						\
-    for (i=1;i<=lua_gettop(L);i++) {					\
-      printf("    value:%d type:%s \n",i,lua_typename(L,lua_type(L,i)));	\
-    }									\
-    printf("  }\n");							\
-  }
+  
+#ifdef ENABLE_DEBUG_STACK
+#  define DEBUG_FUNC(op) printf("Function `%s` Source:'%s' Line:%d\n",#op,__FILE__,__LINE__)
+#  define DEBUG(op) op; printf("Operation `%s` Source:'%s' Line:%d Stack \n//%s//\n",#op,__FILE__,__LINE__,tolua_stackexplore(L))
+#  define DEBUG_STACK(op) printf("Function `%s` Source:'%s' Line:%d Stack \n//%s//\n",#op,__FILE__,__LINE__,tolua_stackexplore(L))
 #else
-#  define DEBUG_STACK(msg) ;
+#  define DEBUG_FUNC(op)
+#  define DEBUG(op) op
+#  define DEBUG_STACK(op)
 #endif
 
 #  define tolua_pushcppstring(x,y) tolua_pushstring(x,(y.c_str()))
@@ -67,8 +64,9 @@ extern "C" {
 
   typedef int lua_Object;
 
-#  include "lua.h"
-#  include "lauxlib.h"
+#  include"lua.h"
+#  include"lualib.h"
+#  include"lauxlib.h"
 
   struct tolua_Error{
     int index;
@@ -77,10 +75,11 @@ extern "C" {
   };
   typedef struct tolua_Error tolua_Error;
   
-#  define TOLUA_NOPEER	LUA_REGISTRYINDEX /* for lua 5.1 */
-
+#  define TOLUA_NOPEER LUA_REGISTRYINDEX /* for lua 5.1 */
+  
   TOLUA_API lua_State* tolua_state();
   TOLUA_API const char* tolua_typename (lua_State* L, int lo);
+  TOLUA_API const char* tolua_stackexplore(lua_State* L);
   TOLUA_API void tolua_error(lua_State* L, char* msg, tolua_Error* err);
   TOLUA_API int tolua_isnoobj(lua_State* L, int lo, tolua_Error* err);
   TOLUA_API int tolua_isvalue(lua_State* L, int lo, int def, tolua_Error* err);
@@ -175,23 +174,29 @@ extern "C" {
     lua_settop(L,ttop);							\
     /*DEBUG_STACK(precall);*/						\
   }
-  /* proxy parameters */
+#  define tolua_embeded(lua_code) #lua_code "\n"
 
-  /* toluaxx proxy technique */
-#  define TOLUA_PROXY_TOP -1
+#  ifndef DISABLE_PROXY_TECHNIQUE /* toluaxx proxy technique */
+  /* proxy parameters */
+#    define TOLUA_PROXY_TOP -1
+  /* proxy functions */
   TOLUA_API int  tolua_proxytop(lua_State* L);
   TOLUA_API int  tolua_proxypush(lua_State* L);
   TOLUA_API int  tolua_proxypop(lua_State* L);
   TOLUA_API void tolua_proxylevel(lua_State* L, int level);
   TOLUA_API void tolua_getproxy(lua_State* L, int level);
   TOLUA_API void tolua_setproxy(lua_State* L, int level);
+#  endif  
+
+#  ifndef DISABLE_TEST_FRAMEWORK /* toluaxx test framework */
   
+#  endif
+
 #  ifdef __cplusplus
   static inline const char* tolua_tocppstring(lua_State* L, int narg, const char* def){
     const char* s = tolua_tostring(L, narg, def);
     return s?s:"";
   }
-  
   static inline const char* tolua_tofieldcppstring(lua_State* L, int lo, int index, const char* def){
     const char* s = tolua_tofieldstring(L, lo, index, def);
     return s?s:"";

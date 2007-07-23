@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1999
--- $Id: tlx_array.lua,v 1.2 2006-11-13 07:00:32 phoenix11 Exp $
+-- $Id: tlx_array.lua,v 1.3 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -13,8 +13,7 @@
 -- Array class
 -- Represents a extern array variable or a public member of a class.
 -- Stores all fields present in a declaration.
-classArray = {
-}
+classArray = {}
 classArray.__index = classArray
 setmetatable(classArray,classDeclaration)
 
@@ -100,7 +99,7 @@ function classArray:supcode ()
    output('   tolua_error(tolua_S,"#vinvalid type in array indexing.",&tolua_err);')
    output(' }')
    output('#endif\n')
-   if flags['1'] then -- for compatibility with tolua5 ?
+   if flags.subst1index then -- for compatibility with tolua5 ?
       output(' tolua_index = (int)tolua_tonumber(tolua_S,2,0)-1;')
    else
       output(' tolua_index = (int)tolua_tonumber(tolua_S,2,0);')
@@ -168,7 +167,7 @@ function classArray:supcode ()
       output(' }')
       output('#endif\n')
 
-      if flags['1'] then -- for compatibility with tolua5 ?
+      if flags['subst1index'] then -- for compatibility with tolua5 ?
 	 output(' tolua_index = (int)tolua_tonumber(tolua_S,2,0)-1;')
       else
 	 output(' tolua_index = (int)tolua_tonumber(tolua_S,2,0);')

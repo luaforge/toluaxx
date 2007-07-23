@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_package.lua,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
+-- $Id: tlx_package.lua,v 1.3 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -106,9 +106,11 @@ end
 -- translate verbatim
 function classPackage:preamble ()
    output('/*\n')
-   output('** Lua binding: '..self.name..'\n')
-   output('** Generated automatically by '..TOLUA_VERSION..' on '..date()..'.\n')
-   output('*/\n\n')
+   output(' * Lua binding: '..self.name..'\n')
+   output(' * Generated automatically by '..tolua.name..' '..tolua.version..'\n')
+   output(' * on '..date()..'\n')
+   output(' * for Lua '..tolua.lua_version..'\n')
+   output(' */\n\n')
    
    output('#ifndef __cplusplus\n')
    output('#include "stdlib.h"\n')
@@ -122,7 +124,7 @@ function classPackage:preamble ()
    output('inline const char* tolua_tofieldcppstring(lua_State* L, int lo, int index, std::string def){return tolua_tofieldcppstring(L,lo,index,def.c_str());}\n')
    output('#endif\n')
    
-   if not flags.h then
+   if not flags.header then
       output('/* Exported function */')
       output('TOLUA_API int tolua_'..self.name..'_open (lua_State* tolua_S);')
       output('\n')
@@ -154,7 +156,7 @@ function classPackage:preamble ()
    output('static void tolua_reg_types (lua_State* tolua_S)')
    output('{')
    foreach(_usertype,function(n,v) output(' tolua_usertype(tolua_S,"',v,'");') end)
-   if flags.t then
+   if flags.typeidlist then
       output("#ifndef Mtolua_typeid\n#define Mtolua_typeid(L,TI,T)\n#endif\n")
       foreach(_usertype,function(n,v) output(' Mtolua_typeid(tolua_S,typeid(',v,'), "',v,'");') end)
    end
@@ -189,6 +191,46 @@ function classPackage:register (pre)
    output(pre.." return tolua_"..self.name.."_open(tolua_S);")
    output(pre.."};")
    output("#endif\n\n")
+
+   if flags.maingen then
+      output('/* Main function */')
+      output('int main(int argc, char* argv[]){')
+      output('#  if LUA_VERSION_NUM >= 501 /* lua 5.1 */')
+      output('  lua_State* tolua_S=luaL_newstate();')
+      output('  luaL_openlibs(tolua_S);')
+      output('#  else\n')
+      output('  lua_State* tolua_S=lua_open();')
+      output('  luaopen_base(tolua_S);')
+      output('  luaopen_io(tolua_S);')
+      output('  luaopen_string(tolua_S);')
+      output('  luaopen_table(tolua_S);')
+      output('  luaopen_math(tolua_S);')
+      output('  luaopen_debug(tolua_S);')
+      output('#  endif\n')
+      output('  {')
+      output('    lua_newtable(tolua_S);')
+      output('    lua_pushvalue(tolua_S,-1);')
+      output('    lua_setglobal(tolua_S,"arg");')
+      output('    {')
+      output('#     if LUA_VERSION_NUM >= 501 /* lua 5.1 */')
+      output('#     else\n')
+      output('        lua_pushstring(tolua_S,"n");')
+      output('        lua_pushnumber(tolua_S,argc);')
+      output('        lua_settable(tolua_S,-3);')
+      output('#     endif\n')
+      output('      for(int i=0;i<argc;i++){')
+      output('        lua_pushnumber(tolua_S,i);')
+      output('        lua_pushstring(tolua_S,argv[i]);')
+      output('        lua_settable(tolua_S,-3);')
+      output('      }')
+      output('    }')
+      output('    lua_pop(tolua_S,1);')
+      output('  }')
+      output('  tolua_'..self.name..'_open(tolua_S);')
+      output('  lua_close(tolua_S);')
+      output('  return 0;')
+      output('}')
+   end
    
    pop()
 end
@@ -196,12 +238,14 @@ end
 -- write header file
 function classPackage:header ()
    output('/*\n') output('** Lua binding: '..self.name..'\n')
-   output('** Generated automatically by '..TOLUA_VERSION..' on '..date()..'.\n')
-   output('*/\n\n')
+   output(' * Generated automatically by '..tolua.name..' '..tolua.version..'\n')
+   output(' * on '..date()..'\n')
+   output(' * for Lua '..tolua.lua_version..'\n')
+   output(' */\n\n')
    
-   if not flags.h then
+   if not flags.header then
       output('/* Exported function */')
-      output('TOLUA_API int  tolua_'..self.name..'_open (lua_State* tolua_S);')
+      output('TOLUA_API int tolua_'..self.name..'_open (lua_State* tolua_S);')
       output('\n')
    end
 end
@@ -230,11 +274,11 @@ function extract_code(fn,s)
       elseif t == "export" then
 	 
       elseif t == "readonly" then
-      
+	 
       elseif t == "property" then
-        
+	 
       elseif t == "property__overload" then
-      
+	 
       else
 	 tolua_error("Unsupported directive 'tolua_"..t.."' in header file")
       end
@@ -252,65 +296,73 @@ end
 
 -- Constructor
 -- Expects the package name, the file extension, and the file text.
-function Package (name,fn)
-   local ext = "pxx"
-   
-   -- open input file, if any
-   if fn then
-      local st, msg = readfrom(flags.f)
-      if not st then
-	 error('#'..msg)
+function Package (name,input)
+   local code = ""
+   for _,ifn in pairs(input) do -- multiple input files
+      local ext = "pxx"
+      
+      -- open input file, if any
+      if ifn then
+	 local st, msg = readfrom(ifn)
+	 if not st then
+	    error('#'..msg)
+	 end
+	 local _; _, _, ext = strfind(ifn,".*%.(.*)$")
       end
-      local _; _, _, ext = strfind(fn,".*%.(.*)$")
-   end
-   local code = "\n" .. read('*a')
-   if ext == 'h' or ext == 'hpp' or ext == 'hxx' then
-      code = extract_code(fn,code)
-   end
-   
-   -- close file
-   if fn then
-      readfrom()
-   end
-
-   -- deal with include directive
-   local nsubst
-   repeat
-      code,nsubst = gsub(code,'\n%s*%$(.)file%s*"(.-)"([^\n]*)\n',
-			 function (kind,fn,extra)
-			    local _, _, ext = strfind(fn,".*%.(.*)$")
-			    local fp,msg = openfile(fn,'r')
-			    if not fp then
-			       local _fn = extract_path(flags.f)..fn
-			       fp,msg = openfile(_fn,'r')
+      local chunk = "\n" .. read('*a')
+      if ext == 'h' or ext == 'hpp' or ext == 'hxx' then
+	 chunk = extract_code(ifn,chunk)
+      end
+      
+      -- close file
+      if ifn then
+	 readfrom()
+      end
+      
+      -- deal with include directive
+      local nsubst
+      repeat
+	 chunk,nsubst = gsub(chunk,'\n%s*%$(.)file%s*"(.-)"([^\n]*)\n',
+			    function (kind,fn,extra)
+			       local _, _, ext = strfind(fn,".*%.(.*)$")
+			       local fp,msg = openfile(fn,'r')
 			       if not fp then
-				  error('#'..msg..': '..fn..' or '.._fn)
+				  local _fn = extract_path(ifn)..fn
+				  fp,msg = openfile(_fn,'r')
+				  if not fp then
+				     error('#'..msg..': '..fn..' or '.._fn)
+				  end
 			       end
-			    end
-			    local s = read(fp,'*a')
-			    closefile(fp)
-			    if kind == 'c' or kind == 'h' then
-			       return extract_code(fn,s)
-			    elseif kind == 'p' then
-			       return "\n\n" .. s
-			    elseif kind == 'l' then
-			       return "\n$[--##"..fn.."\n" .. s .. "\n$]\n"
-			    elseif kind == 'i' then
-			       local t = {code=s}
-			       extra = string.gsub(extra, "^%s*,%s*", "")
-			       local pars = split_c_tokens(extra, ",")
-			       include_file_hook(t, fn, unpack(pars))
-			       return "\n\n" .. t.code
-			    else
-			       error('#Invalid include directive (use $cfile, $hfile, $pfile, $lfile or $ifile)')
-			    end
-			 end)
-   until nsubst==0
-   
-   -- deal with renaming directive
-   repeat -- I don't know why this is necesary
-      code,nsubst = gsub(code,'\n%s*%$renaming%s*(.-)%s*\n', function (r) appendrenaming(r) return "\n" end)
-   until nsubst == 0
+			       local s = read(fp,'*a')
+			       closefile(fp)
+			       if kind == 'c' or kind == 'h' then
+				  return extract_code(fn,s)
+			       elseif kind == 'p' then
+				  return "\n\n" .. s
+			       elseif kind == 'l' then
+				  return "\n$[--##"..fn.."\n" .. s .. "\n$]\n"
+			       elseif kind == 'i' then
+				  local t = {code=s}
+				  extra = string.gsub(extra, "^%s*,%s*", "")
+				  local pars = split_c_tokens(extra, ",")
+				  include_file_hook(t, fn, unpack(pars))
+				  return "\n\n" .. t.code
+			       else
+				  error('#Invalid include directive (use $cfile, $hfile, $pfile, $lfile or $ifile)')
+			       end
+			    end)
+      until nsubst==0
+      
+      -- deal with renaming directive
+      repeat -- I don't know why this is necesary
+	 chunk,nsubst = gsub(chunk,'\n%s*%$renaming%s*(.-)%s*\n', function(r)
+								     appendrenaming(r)
+								     return "\n"
+								  end)
+      until nsubst == 0
+      
+      code = code..chunk
+   end
    
    local t = _Package(_Container{name=name, code=code})
    push(t)
@@ -321,5 +373,3 @@ function Package (name,fn)
    pop()
    return t
 end
-
-

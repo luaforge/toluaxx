@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_class.lua,v 1.2 2007-04-07 13:18:09 phoenix11 Exp $
+-- $Id: tlx_class.lua,v 1.3 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -76,7 +76,7 @@ function classClass:requirecollection (t)
    pop()
    -- only class that exports destructor can be appropriately collected
    -- classes that export constructors need to have a collector (overrided by -D flag on command line)
-   if self._delete or ((not flags['D']) and self._new) then
+   if self._delete or ((not flags.noautodest) and self._new) then
       --t[self.type] = "tolua_collect_" .. gsub(self.type,"::","_")
       t[self.type] = "tolua_collect_" .. clean_template(self.type)
       r = true
@@ -216,30 +216,32 @@ function Class (n,p,b)
    -->>>>----------------------------------------------------------------------->>>>--
    -- Adding automatic generation of constructor, destructor and sizeof functions (KS)
    -- Thanks KS
-   c._new=false
-   c._delete=false
-   c._sizeof=false
-   -- if no default constructor, destructor was found create one
-   -- begin adding
-   if b ~= '' then
-      --if not c._new then
-      -- hackeyShit = n..'();'
-      --print('Didnt find constructor, adding one')
-      -- c:parse(hackeyShit);
-      --end
-      --if not c._delete then
-      -- hackeyShit ='~'..n..'();'
-      --print('Didnt find destructor, adding one')
-      --c:parse(hackeyShit);
-      --end
-      -- add a SIZEOF() function
-      --if not c._sizeof then
-      --   --print('Adding sizeof function')
-      --   sizeofFunc = 'DWORD SIZEOF();'
-      --   c:parse(sizeofFunc)
-      --   -- we are adding so reset this to false
-      --   c._sizeof = false
-      --end
+   if flags.autogen then -- no debuged
+      --c._new=false
+      --c._delete=false
+      --c._sizeof=false
+      -- if no default constructor, destructor was found create one
+      -- begin adding
+      if b ~= '' then
+	 if not c._new then
+	    hackeyShit = n..'();'
+	    print('Didnt find constructor, adding one')
+	    c:parse(hackeyShit);
+	 end
+	 if not c._delete then
+	    hackeyShit ='~'..n..'();'
+	    print('Didnt find destructor, adding one')
+	    c:parse(hackeyShit);
+	 end
+	 -- add a SIZEOF() function
+	 if not c._sizeof then
+	    --print('Adding sizeof function')
+	    sizeofFunc = 'DWORD SIZEOF();'
+	    c:parse(sizeofFunc)
+	    -- we are adding so reset this to false
+	    c._sizeof = false
+	 end
+      end
    end
    -- end adding by KS
    --<<<<-----------------------------------------------------------------------<<<<--

@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_variable.lua,v 1.4 2006-11-13 07:00:32 phoenix11 Exp $
+-- $Id: tlx_variable.lua,v 1.5 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -151,7 +151,7 @@ function classVariable:checkstatic()
 end
 
 function classVariable:isstatic()
-  return self.static
+   return self.static
 end
 
 function classVariable:declself()
@@ -290,15 +290,13 @@ end
 
 -- Internal constructor
 function _Variable (t)
- setmetatable(t,classVariable)
- append(t)
- return t
+   setmetatable(t,classVariable)
+   append(t)
+   return t
 end
 
 -- Constructor
 -- Expects a string representing the variable declaration.
 function Variable (s)
- return _Variable (Declaration(s,'var'))
+   return _Variable (Declaration(s,'var'))
 end
-
-

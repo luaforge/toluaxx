@@ -45,6 +45,9 @@ AXT=a
 RL=g++ $(1) -o $(2) $(3)
 RXT=run
 
+# Lunable Builder
+LL=g++ -D"require(s) "
+
 # Shader Linker
 SL=g++ -shared $(1) -o $(2) $(3)
 SXT=so

@@ -3,7 +3,7 @@
 -- TeCGraf/PUC-Rio
 -- Jul 1998
 -- Last update: Apr 2003
--- $Id: tlx_doit.lua,v 1.2 2006-11-23 19:43:54 phoenix11 Exp $
+-- $Id: tlx_doit.lua,v 1.3 2007-07-23 18:57:29 phoenix11 Exp $
 
 
 -- This code is free software; you can redistribute it and/or modify it.
@@ -24,10 +24,11 @@ end
 
 function doit ()
    -- define package name, if not provided
-   if not flags.n then
-      if flags.f then
-	 flags.n = gsub(flags.f,"%..*$","")
-	 _,_,flags.n = string.find(flags.n, "([^/\\]*)$")
+   flags.pkgname=flags.pkgname or {}
+   if not flags.pkgname[1] then
+      if flags.input then
+	 flags.pkgname[1] = gsub(flags.input[1],"%..*$","")
+	 _,_,flags.pkgname[1] = string.find(flags.pkgname[1], "([^/\\]*)$")
       else
 	 error("#no package name nor input file provided")
       end
@@ -37,12 +38,12 @@ function doit ()
    parse_extra()
    
    -- do this after setting the package name
-   if flags['L'] then
-      dofile(flags['L'])
+   if flags.luafile then
+      dofile(flags.luafile[1])
    end
    
    -- add cppstring
-   if not flags['S'] then
+   if not flags.nostdstring then
       _basic['string'] = 'cppstring'
       _basic['std::string'] = 'cppstring'
       _basic_ctype.cppstring = 'const char*'
@@ -50,21 +51,21 @@ function doit ()
    end
    
    -- proccess package
-   local p = Package(flags.n,flags.f)
+   local p = Package(flags.pkgname[1],flags.input)
    
-   if flags.p then
-      return        -- only parse
+   if flags.parseonly then -- only parse
+      return
    end
    
-   if flags.o then
-      local st,msg = writeto(flags.o)
+   if flags.output then
+      local st,msg = writeto(flags.output[1])
       if not st then
 	 error('#'..msg)
       end
    end
    
    p:decltype()
-   if flags.P then
+   if flags.parseinfo then
       p:print()
    else
       p:preamble()
@@ -75,14 +76,14 @@ function doit ()
       pop()
    end
    
-   if flags.o then
+   if flags.output then
       writeto()
    end
    
    -- write header file
-   if not flags.P then
-      if flags.H then
-	 local st,msg = writeto(flags.H)
+   if not flags.parseinfo then
+      if flags.header then
+	 local st,msg = writeto(flags.header[1])
 	 if not st then
 	    error('#'..msg)
 	 end

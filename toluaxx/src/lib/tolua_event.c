@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.8 2007-01-14 11:21:06 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.9 2007-07-23 18:57:29 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -52,7 +52,6 @@ static void storeatubox (lua_State* L, int lo){
   lua_pop(L,1);                           /* pop ubox[u] */
 #endif
 }
-
 /* Module index function
  */
 static int module_index_event (lua_State* L){
@@ -84,7 +83,6 @@ static int module_index_event (lua_State* L){
   lua_pushnil(L);
   return 1;
 }
-
 /* Module newindex function
  */
 static int module_newindex_event (lua_State* L){
@@ -204,7 +202,6 @@ static int class_index_event (lua_State* L){
   lua_pushnil(L);
   return 1;
 }
-
 /* Newindex function
  * It first searches for a C/C++ varaible to be set.
  * Then, it either stores it in the alternative ubox table (in the case it is
@@ -256,6 +253,7 @@ static int class_newindex_event (lua_State* L){
 }
 #else // ifndef TOLUA_OLD_INDEX_METHODS
 static int class_index_event (lua_State* L){ // method with operator[](string)
+  DEBUG_STACK(static int class_index_event (lua_State* L));
   int t = lua_type(L,1);
   if (t == LUA_TUSERDATA) {
     lua_pushvalue(L,1);                      /* stack: obj key obj */
@@ -334,15 +332,25 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
       lua_settop(L,3);                       /* stack: obj key mt */
     }
     lua_settop(L,2);                         /* stack: obj key */
+#define DEBUG(op) op
     /* Access alternative table */
 #ifdef LUA_VERSION_NUM /* new macro on version 5.1 */
-    lua_getfenv(L,1);                        /* stack: obj key ?peer? */
-    if (!lua_rawequal(L, -1, TOLUA_NOPEER)) {/* check if ?peer? is peer */
-      lua_pushvalue(L, 2);                   /* stack: obj key peer key */
-      lua_gettable(L, -2);                   /* stack: obj key val */
+    DEBUG(lua_getfenv(L,1));                 /* stack: obj key ?peer? */
+#if 0
+    if (!lua_rawequal(L, -1,TOLUA_NOPEER)) { /* check if ?peer? is peer */
+      DEBUG(lua_pushvalue(L, 2));            /* stack: obj key peer key */
+      DEBUG(lua_gettable(L, -2));            /* stack: obj key val */
       /* on lua 5.1, we trade the "tolua_peers" lookup for a gettable call */
       if (!lua_isnil(L, -1)) return 1;       /* stack: val */
     }
+#else
+    if (lua_istable(L,-1)) { /* check if ?peer? is peer */
+      DEBUG(lua_pushvalue(L, 2));            /* stack: obj key peer key */
+      DEBUG(lua_gettable(L, -2));            /* stack: obj key val */
+      /* on lua 5.1, we trade the "tolua_peers" lookup for a gettable call */
+      if (!lua_isnil(L, -1)) return 1;       /* stack: val */
+    }
+#endif
 #else
     lua_pushstring(L,"tolua_peers");
     lua_rawget(L,LUA_REGISTRYINDEX);         /* stack: obj key ubox */
@@ -364,7 +372,6 @@ static int class_index_event (lua_State* L){ // method with operator[](string)
   lua_pushnil(L);                            /* stack: obj key mt nil */
   return 1;                                  /* stack: nil */
 }
-
 /* Newindex function
  * It first searches for a C/C++ varaible to be set.
  * Then, it either stores it in the alternative ubox table (in the case it is
@@ -464,7 +471,6 @@ static int class_newindex_event (lua_State* L){
 }
 #endif
 
-
 /*
  *  .... obj tab
  *    next with tab
@@ -508,27 +514,20 @@ static int tolua_class_attribs_from_table(lua_State* L){
   //DEBUG_STACK(lua_next(L,-1)!=0 end);
   return 1;                                 /* stack: obj tab */
 }
-
 static int class_call_event(lua_State* L) {
   if (lua_istable(L,1)) {                   /* stack: obj <args> */
     lua_pushstring(L,".call");              /* stack: obj <args> ".call" */
     lua_rawget(L,1);                        /* stack: obj <args> ?func? */
     if (lua_isfunction(L,-1)) {             /* chack if ?func? is function */
-      lua_insert(L,1);                      /* stack: func obj <args> */
-      DEBUG_STACK(lua_isfunction(L,-1) lua_insert(L,1));
+      DEBUG(lua_insert(L,1));               /* stack: func obj <args> */
       if(lua_gettop(L)>2 && lua_istable(L,-1)){ /* chack if last arg is lua table */
-	DEBUG_STACK(lua_gettop(L)>2 && lua_istable(L,-1));
+	DEBUG_FUNC(lua_gettop(L)>2 && lua_istable(L,-1));
 	                                    /* stack: func obj <args> table */
-	lua_insert(L,1);                    /* stack: table func obj <args> */
-	DEBUG_STACK(lua_insert(L,1));
-	lua_call(L,lua_gettop(L)-2,1);      /* stack: table ret */
-	DEBUG_STACK(lua_call(L,lua_gettop(L)-2,1));
-	lua_insert(L,-2);                   /* stack: ret table */
-	DEBUG_STACK(lua_insert(L,-2));
-	tolua_class_attribs_from_table(L);  /* stack: ret table */
-	DEBUG_STACK(tolua_class_attribs_from_table(L));
-	lua_remove(L,-1);                   /* stack: ret */
-	DEBUG_STACK(tolua_class_attribs_from_table(L) lua_remove(L,-1));
+	DEBUG(lua_insert(L,1));             /* stack: table func obj <args> */
+	DEBUG(lua_call(L,lua_gettop(L)-2,1));      /* stack: table ret */
+	DEBUG(lua_insert(L,-2));                   /* stack: ret table */
+	DEBUG(tolua_class_attribs_from_table(L));  /* stack: ret table */
+	DEBUG(lua_remove(L,-1));                   /* stack: ret */
 	return 1;                           /* stack: ret */
       }else{
 	                                    /* stack: func obj <args> */
@@ -566,7 +565,6 @@ static int class_call_event(lua_State* L) {
   tolua_error(L,"Attempt to call a non-callable object.",NULL);
   return 0;
 };
-
 static int do_twin_operator (lua_State* L, const char* op) {
   if (lua_isuserdata(L,1)) {          /* stack: op1 op2 */
     lua_pushvalue(L,1);               /* stack: op1 op2 op1 */
@@ -586,7 +584,6 @@ static int do_twin_operator (lua_State* L, const char* op) {
   tolua_error(L,"Attempt to perform operation on an invalid operand",NULL);
   return 0;
 }
-/// +++ <<<
 static int do_unary_operator (lua_State* L, const char* op) {
   if (lua_isuserdata(L,1)) {         /* stack: op */
     lua_pushvalue(L,1);              /* stack: op op */
@@ -606,7 +603,6 @@ static int do_unary_operator (lua_State* L, const char* op) {
   tolua_error(L,"Attempt to perform operation on an invalid operand",NULL);
   return 0;
 }
-/// +++ >>>
 
 static int class_tostring_event (lua_State* L){
   if (lua_isuserdata(L,1)) {         /* stack: op */
@@ -635,51 +631,39 @@ static int class_tostring_event (lua_State* L){
   tolua_error(L,"Attempt to perform operation .string on an invalid operand",NULL);
   return 0;
 }
-
 static int class_add_event (lua_State* L){
   return do_twin_operator(L,".add");
 }
-
 static int class_sub_event (lua_State* L){
   return do_twin_operator(L,".sub");
 }
-
 static int class_mul_event (lua_State* L){
   return do_twin_operator(L,".mul");
 }
-
 static int class_pow_event (lua_State* L){
   return do_twin_operator(L,".pow");
 }
-
 static int class_len_event (lua_State* L){
   return do_unary_operator(L,".len");
 }
-
 static int class_unm_event (lua_State* L){
   return do_unary_operator(L,".unm");
 }
-
 static int class_mod_event (lua_State* L){
   return do_twin_operator(L,".mod");
 }
-
 static int class_div_event (lua_State* L){
   return do_twin_operator(L,".div");
 }
-
 static int class_concat_event (lua_State* L){
   return do_twin_operator(L,".concat");
 }
-
 static int class_lt_event (lua_State* L){
   return do_twin_operator(L,".lt");
 }
-
 static int class_le_event (lua_State* L){
   return do_twin_operator(L,".le");
 }
-
 static int class_eq_event (lua_State* L){
   return do_twin_operator(L,".eq");
 }
@@ -742,8 +726,6 @@ TOLUA_API int class_gc_event (lua_State* L){
   lua_pop(L,3);
   return 0;
 }
-
-
 /* Register module events
 	* It expects the metatable on the top of the stack
 */
@@ -755,7 +737,6 @@ TOLUA_API void tolua_moduleevents (lua_State* L){
   lua_pushcfunction(L,module_newindex_event);
   lua_rawset(L,-3);
 }
-
 /* Check if the object on the top has a module metatable
 */
 TOLUA_API int tolua_ismodulemetatable (lua_State* L){
@@ -768,7 +749,6 @@ TOLUA_API int tolua_ismodulemetatable (lua_State* L){
   }
   return r;
 }
-
 /* Register class events
 	* It expects the metatable on the top of the stack
 */
@@ -832,4 +812,3 @@ TOLUA_API void tolua_classevents (lua_State* L) {
   /*lua_pushcfunction(L,class_gc_event);*/
   lua_rawset(L,-3);
 }
-

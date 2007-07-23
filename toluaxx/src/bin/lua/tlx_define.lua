@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_define.lua,v 1.1.1.2 2006-10-25 10:55:57 phoenix11 Exp $
+-- $Id: tlx_define.lua,v 1.2 2007-07-23 18:57:29 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -15,49 +15,49 @@
 -- The following filds are stored:
 --   name = constant name
 classDefine = {
- name = '',
+   name = '',
 }
 classDefine.__index = classDefine
 setmetatable(classDefine,classFeature)
 
 -- register define
 function classDefine:register (pre)
-	if not self:check_public_access() then
-		return
-	end
+   if not self:check_public_access() then
+      return
+   end
 
- pre = pre or ''
- output(pre..'tolua_constant(tolua_S,"'..self.lname..'",'..self.name..');')
+   pre = pre or ''
+   output(pre..'tolua_constant(tolua_S,"'..self.lname..'",'..self.name..');')
 end
 
 -- Print method
 function classDefine:print (ident,close)
- print(ident.."Define{")
- print(ident.." name = '"..self.name.."',")
- print(ident.." lname = '"..self.lname.."',")
- print(ident.."}"..close)
+   print(ident.."Define{")
+   print(ident.." name = '"..self.name.."',")
+   print(ident.." lname = '"..self.lname.."',")
+   print(ident.."}"..close)
 end
 
 
 -- Internal constructor
 function _Define (t)
- setmetatable(t,classDefine)
- t:buildnames()
+   setmetatable(t,classDefine)
+   t:buildnames()
 
- if t.name == '' then
-  error("#invalid define")
- end
+   if t.name == '' then
+      error("#invalid define")
+   end
 
- append(t)
- return t
+   append(t)
+   return t
 end
 
 -- Constructor
 -- Expects a string representing the constant name
 function Define (n)
- return _Define{
-  name = n
- }
+   return _Define{
+      name = n
+   }
 end
 
 

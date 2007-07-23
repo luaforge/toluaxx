@@ -55,6 +55,12 @@ else
   CFLAGS+=$(CFLAGS.RELEASE)
   BIND=enable
 endif
+ifneq ($(DISABLE),)
+  CFLAGS+=$(addprefix -DDISABLE_,$(DISABLE))
+endif
+ifneq ($(ENABLE),)
+  CFLAGS+=$(addprefix -DENABLE_,$(ENABLE))
+endif
 ifdef CFLAGS.I                     # Add global include path
   ifneq ($(CFLAGS.I),)
     CFLAGS+=$(call C.I,$(CFLAGS.I))
@@ -131,6 +137,23 @@ install.bin.$(1): $(PREFIX)/bin/$$($(1).name).$(RXT)
 uninstall.bin.$(1): # Uninstall rules
 	@$(ECHO) Uninstall $(PREFIX)/bin/$$($(1).name).$(RXT)....
 	@$(EXEC) $$(call RM,$(PREFIX)/bin/$$($(1).name).$(RXT))
+      $(1).uninstall+=uninstall.bin.$(1)
+    endif
+     ifeq ($$($(1).lunable),enable)      # Runable with lua target build path
+bin/$$($(1).name).$(LXT): src/$(1)/$$($(1).lfile)
+	@$(ECHO) Build lunable module $(1)....
+	@$(EXEC) $(call LL,$$<,$$@)
+build.bin.$(1): bin/$$($(1).name).$(LXT)
+      $(1).target+=bin/$$($(1).name).$(LXT)
+      TARGET.DIRS+=bin
+$(PREFIX)/bin/$$($(1).name).$(LXT): bin/$$($(1).name).$(LXT) # Install rules
+	@$(ECHO) Install $$^ to $$@....
+	@$(EXEC) $$(call CP,$$^ $$@)
+install.bin.$(1): $(PREFIX)/bin/$$($(1).name).$(LXT)
+      $(1).install+=install.bin.$(1)
+uninstall.bin.$(1): # Uninstall rules
+	@$(ECHO) Uninstall $(PREFIX)/bin/$$($(1).name).$(LXT)....
+	@$(EXEC) $$(call RM,$(PREFIX)/bin/$$($(1).name).$(LXT))
       $(1).uninstall+=uninstall.bin.$(1)
     endif
     ifeq ($$($(1).shared),enable)       # Shared library target build path
