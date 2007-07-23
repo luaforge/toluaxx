@@ -46,7 +46,8 @@ RL=g++ $(1) -o $(2) $(3)
 RXT=run
 
 # Lunable Builder
-LL=g++ -D"require(s) "
+LL=echo "\#!/usr/bin/env lua5.1" > $(2) && luac5.1 -o obj/toluaxx.luac $(1) && cat obj/toluaxx.luac >> $(2) && rm -f obj/toluaxx.luac && chmod 755 $(2)
+LXT=run
 
 # Shader Linker
 SL=g++ -shared $(1) -o $(2) $(3)

@@ -18,7 +18,33 @@ bin.static=disable
 bin.shared=disable
 bin.dep=lib # deprecated
 #bin.libs=$(LIB.NAME)
-bin.lfile=lua/tlx_all.lua
+bin.lfile=$(addprefix src/bin/lua/,\
+tlx_config.lua \
+tlx_compat51.lua \
+tlx_compat.lua \
+tlx_basic.lua \
+tlx_feature.lua \
+tlx_verbatim.lua \
+tlx_code.lua \
+tlx_typedef.lua \
+tlx_container.lua \
+tlx_package.lua \
+tlx_module.lua \
+tlx_namespace.lua \
+tlx_define.lua \
+tlx_enumerate.lua \
+tlx_declaration.lua \
+tlx_variable.lua \
+tlx_array.lua \
+tlx_function.lua \
+tlx_operator.lua \
+tlx_class.lua \
+tlx_clean.lua \
+tlx_custom.lua \
+tlx_doit.lua \
+tlx_cmd.lua \
+tlx_main.lua)
+
 
 ifeq ($(DEBUG),disable)
   BIND=enable

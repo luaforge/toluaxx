@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1999
--- $Id: tlx_code.lua,v 1.2 2007-07-23 18:57:29 phoenix11 Exp $
+-- $Id: tlx_code.lua,v 1.3 2007-07-23 21:22:11 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -32,7 +32,7 @@ function classCode:register (pre)
       --print(self.text)
       error("parser error in embedded code")
    end
-
+   
    -- get first line
    local _, _, first_line=string.find(self.text, "^([^\n\r]*)")
    if string.find(first_line, "^%s*%-%-") then

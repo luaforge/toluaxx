@@ -139,10 +139,10 @@ uninstall.bin.$(1): # Uninstall rules
 	@$(EXEC) $$(call RM,$(PREFIX)/bin/$$($(1).name).$(RXT))
       $(1).uninstall+=uninstall.bin.$(1)
     endif
-     ifeq ($$($(1).lunable),enable)      # Runable with lua target build path
-bin/$$($(1).name).$(LXT): src/$(1)/$$($(1).lfile)
+    ifeq ($$($(1).lunable),enable)      # Runable with lua target build path
+bin/$$($(1).name).$(LXT): $$($(1).lfile)
 	@$(ECHO) Build lunable module $(1)....
-	@$(EXEC) $(call LL,$$<,$$@)
+	@$(EXEC) $(call LL,$$^,$$@)
 build.bin.$(1): bin/$$($(1).name).$(LXT)
       $(1).target+=bin/$$($(1).name).$(LXT)
       TARGET.DIRS+=bin
