@@ -1,5 +1,5 @@
 
-function extract_code(fn,s)
+function __extract_code(fn,s)
    local code = ""
    if fn then
       code = '\n$#include "'..fn..'"\n'

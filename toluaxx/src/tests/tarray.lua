@@ -3,7 +3,8 @@ require"marray"
 
 init()
 
-t=tolua.test("toluaxx","Array test","phoenix11")
+local t=test("Array test")
+--local t=tolua.test("","Array test","")
 
 for i=0,9 do
    t(a[i],i,"a[i]==i i="..tostring(i))
@@ -40,10 +41,13 @@ end
 
 for i=1,9 do
    array.p[i] = array.pp[0]
-   t(array.p[i].x,false,"array.p[i].x==0 i="..tostring(i))
+   t(array.p[i].x,0,"array.p[i].x==0 i="..tostring(i))
    t(array.p[i].y,1,"array.p[i].y==1 i="..tostring(i))
 end
 
+--t:log()
+test()
 --print(t.result)
 --print(t.errors)
-print(t.report)
+--print(t.report)
+

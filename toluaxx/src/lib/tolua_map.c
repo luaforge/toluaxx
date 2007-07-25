@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.5 2007-07-23 18:57:29 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.6 2007-07-25 18:02:33 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -924,11 +924,12 @@ TOLUA_API void tolua_open (lua_State* L){
     tolua_usertype(L,"tolua::test");
     tolua_cclass(L,"test","tolua::test","",NULL);
     tolua_beginmodule(L,"test");
-    tolua_function(L,"new",      tolua_bnd_test_new);
-    tolua_function(L,".call",    tolua_bnd_test_new);
-    tolua_function(L,".len",     tolua_bnd_test_get_count);
-    tolua_function(L,"accert",   tolua_bnd_test_assert);
-    tolua_function(L,".callself",tolua_bnd_test_assert);
+    tolua_function(L,"new",        tolua_bnd_test_new);
+    tolua_function(L,".call",      tolua_bnd_test_new);
+    tolua_function(L,".len",       tolua_bnd_test_get_count);
+    tolua_function(L,"accert",     tolua_bnd_test_assert);
+    tolua_function(L,".callself",  tolua_bnd_test_assert);
+    tolua_function(L,".string",    tolua_bnd_test_get_report);
     /* test variables */
     tolua_variable(L,"name",       tolua_bnd_test_get_name,NULL);
     tolua_variable(L,"author",     tolua_bnd_test_get_author,NULL);

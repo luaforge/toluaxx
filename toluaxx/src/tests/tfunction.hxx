@@ -1,8 +1,6 @@
-#ifndef tfunction_h
-#define tfunction_h
-
-#include <stdio.h>
-#include <string.h>
+#pragma once
+#include<stdio.h>
+#include<string.h>
 
 typedef enum {
   FIRST = 1,
@@ -138,5 +136,3 @@ class Object{  //tolua_export
 //tolua_end
 
 int get_number(int n=0 /**asnil**/)/**= 0 asnil**/; //tolua_export
-
-#endif

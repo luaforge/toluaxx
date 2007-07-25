@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_container.lua,v 1.5 2007-04-07 13:18:09 phoenix11 Exp $
+-- $Id: tlx_container.lua,v 1.6 2007-07-25 18:02:33 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -32,7 +32,6 @@ function classContainer:decltype ()
    end
    pop()
 end
-
 
 -- write support code
 function classContainer:supcode ()

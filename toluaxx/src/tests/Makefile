@@ -14,7 +14,7 @@ COPTS += `pkg-config --cflags lua5.1` -I../../include/toluaxx5.1
 
 ECHO=echo
 VME=$(PRERUN) lua5.1
-CB=$(PRERUN) ../../bin/toluaxx5.1.run --no-cleanup
+CB=$(PRERUN) ../../bin/toluaxx5.1.run --no-cleanup -I ../../ -I../../bin
 CX=g++ -c -g
 CXX=g++ -g
 RM=rm -f

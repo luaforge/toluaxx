@@ -1,10 +1,11 @@
 $hfile"tmain.hxx"
 $[
-print(#arg)
-for i,v in pairs(arg) do print(i,v) end
-assert(#arg==3)
-assert(arg[1]=="-o2")                                                                                                      
-assert(arg[2]=="v2")                                                                                                       
-assert(arg[3]=="file")
+require"base"
+local t1=test("Main emulation test #1")
+t1(#arg,3,"#arg==3")
+t1(arg[1],"-o2","arg[1]==\"-o2\"")
+t1(arg[2],"v2","arg[2]==\"v2\"")
+t1(arg[3],"file","arg[3]==\"file\"")
+t1:log()
 $]
 $lfile"imain.lua"

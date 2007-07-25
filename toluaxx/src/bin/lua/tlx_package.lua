@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_package.lua,v 1.3 2007-07-23 18:57:29 phoenix11 Exp $
+-- $Id: tlx_package.lua,v 1.4 2007-07-25 18:02:33 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -259,39 +259,42 @@ end
 -- Parse C header file with tolua directives
 -- *** Thanks to Ariel Manzur for fixing bugs in nested directives ***
 function extract_code(fn,s)
-   local code = '\n$#include "'..fn..'"\n'
-   s= "\n" .. s .. "\n" -- add blank lines as sentinels
-   local _,e,c,t = strfind(s, "\n([^\n]-)[Tt][Oo][Ll][Uu][Aa]_([^%s]*)[^\n]*\n")
+   local code='\n$#include "'..fn..'"\n'
+   s="\n"..s.."\n" -- add blank lines as sentinels
+   local _,e,c,t=strfind(s,"\n([^\n]-)[Tt][Oo][Ll][Uu][Aa]_([^%s]*)[^\n]*\n")
    while e do
-      t = strlower(t)
-      if t == "begin" then
-	 _,e,c = strfind(s,"(.-)\n[^\n]*[Tt][Oo][Ll][Uu][Aa]_[Ee][Nn][Dd][^\n]*\n",e)
+      t=strlower(t)
+      if t=="begin" then
+	 _,e,c=strfind(s,"(.-)\n[^\n]*[Tt][Oo][Ll][Uu][Aa]_[Ee][Nn][Dd][^\n]*\n",e)
 	 if not e then
 	    tolua_error("Unbalanced 'tolua_begin' directive in header file")
 	 end
 	 --- delete code with // tolua_noexport ---
 	 c=string.gsub(c,"\n[^\n]-[Tt][Oo][Ll][Uu][Aa]_[Nn][Oo][Ee][Xx][Pp][Oo][Rr][Tt][^\n]*\n","\n")
-      elseif t == "export" then
+      elseif t=="export" then
 	 
-      elseif t == "readonly" then
+      elseif t=="readonly" then
 	 
-      elseif t == "property" then
+      elseif t=="property" then
 	 
-      elseif t == "property__overload" then
+      elseif t=="property__overload" then
 	 
       else
 	 tolua_error("Unsupported directive 'tolua_"..t.."' in header file")
       end
-      code = code .. c .. "\n"
-      _,e,c,t = strfind(s, "\n([^\n]-)[Tt][Oo][Ll][Uu][Aa]_([^%s]*)[^\n]*\n",e)
+      code=code..c.."\n"
+      _,e,c,t=strfind(s,"\n([^\n]-)[Tt][Oo][Ll][Uu][Aa]_([^%s]*)[^\n]*\n",e)
    end
    --- ancomment /** **/ ---
    code=string.gsub(code,"%/%*%*(.-)%*%*%/","%1")
    return code
 end
 
-function extract_path(name)
-   return string.gsub(name,"(.+%/).+","%1")
+function extract_path(fn)
+   if string.find(fn,"%/") then
+      return string.gsub(fn,"(.+%/).+","%1")
+   end
+   return ""
 end
 
 -- Constructor
@@ -323,30 +326,45 @@ function Package (name,input)
       local nsubst
       repeat
 	 chunk,nsubst = gsub(chunk,'\n%s*%$(.)file%s*"(.-)"([^\n]*)\n',
-			    function (kind,fn,extra)
-			       local _, _, ext = strfind(fn,".*%.(.*)$")
-			       local fp,msg = openfile(fn,'r')
+			    function(kind,fn,extra)
+			       local _,_,ext=strfind(fn,".*%.(.*)$")
+			       local _fn=extract_path(ifn)..fn
+			       local fp,mf=openfile(_fn,'r') -- try open fn in .pxx catalog
+			       local msg=mf or ""
 			       if not fp then
-				  local _fn = extract_path(ifn)..fn
-				  fp,msg = openfile(_fn,'r')
-				  if not fp then
-				     error('#'..msg..': '..fn..' or '.._fn)
+				  fp,mf=openfile(fn,'r')
+				  if not fp and fn~=_fn then
+				     msg=msg.."\n          "..mf
 				  end
 			       end
-			       local s = read(fp,'*a')
+			       if not fp then
+				  if flags.include_path then
+				     for _,n in pairs(flags.include_path) do
+					if string.sub(n,-1)~="/" then n=n.."/" end
+					fp,mf=openfile(n..fn,'r')
+					if not fp then
+					   msg=msg.."\n          "..mf
+					end
+				     end
+				  end
+			       end
+			       if not fp then
+				  error('#'..msg..'')
+			       end
+			       local s=read(fp,'*a')
 			       closefile(fp)
-			       if kind == 'c' or kind == 'h' then
+			       if kind=='c' or kind=='h' then
 				  return extract_code(fn,s)
-			       elseif kind == 'p' then
-				  return "\n\n" .. s
-			       elseif kind == 'l' then
-				  return "\n$[--##"..fn.."\n" .. s .. "\n$]\n"
-			       elseif kind == 'i' then
-				  local t = {code=s}
-				  extra = string.gsub(extra, "^%s*,%s*", "")
-				  local pars = split_c_tokens(extra, ",")
-				  include_file_hook(t, fn, unpack(pars))
-				  return "\n\n" .. t.code
+			       elseif kind=='p' then
+				  return "\n\n"..s
+			       elseif kind=='l' then
+				  return "\n$[--##"..fn.."\n"..s.."\n$]\n"
+			       elseif kind=='i' then
+				  local t={code=s}
+				  extra=string.gsub(extra,"^%s*,%s*","")
+				  local pars=split_c_tokens(extra,",")
+				  include_file_hook(t,fn,unpack(pars))
+				  return "\n\n"..t.code
 			       else
 				  error('#Invalid include directive (use $cfile, $hfile, $pfile, $lfile or $ifile)')
 			       end

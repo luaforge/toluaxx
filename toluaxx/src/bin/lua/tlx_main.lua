@@ -2,7 +2,7 @@
 -- Written by PhoeniX11 Kayo
 -- RareSky
 -- Jul 2007
--- $Id: tlx_main.lua,v 1.1 2007-07-23 21:22:11 phoenix11 Exp $
+-- $Id: tlx_main.lua,v 1.2 2007-07-25 18:02:33 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -700,6 +700,7 @@ function main(a)
    c("output",      {"-o","--output"        }, _("set output file (default is stdout)"), _("path/to/file"))
    c("header",      {"-H","--header"        }, _("create include header file"),          _("path/to/file"))
    c("pkgname",     {"-n","--pkgname"       }, _("set package name (default is input file name without extension and path)"), _("package_name"))
+   c("include_path",{"-I","--include-path"  }, _("add the directory include_dir to the list of directories to be searched for ${c,h,l,p,i}file\"...\" files"), _("include_dir"))
    c("parseonly",   {"-p","--parse-only"    }, _("parse only and not produce c++ output (for debug)"))
    c("parseinfo",   {"-P","--parse-info"    }, _("parse and print structure information (for debug)"))
    c("maingen",     {"-m","--main-gen"      }, _("produce for build executble (int main(){..}, i.e.)"))

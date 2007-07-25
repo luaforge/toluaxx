@@ -64,7 +64,7 @@ inline	void copyvector (int n, const Point v[n], Point u[n]=(u+i));
 
 inline Order invert (Order o);
 
-$cfile "tfunction.hxx"
+$cfile"tfunction.hxx"
 
 /*
 class ColorPoint : public Point
