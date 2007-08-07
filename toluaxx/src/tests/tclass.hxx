@@ -1,7 +1,8 @@
 #pragma once
 
-#include <stdio.h>
-#include <lua.h>
+#include<stdio.h>
+#include<lua.h>
+#include"toluaxx.h"
 
 namespace Test {
   class Tst_Dummy{
@@ -47,7 +48,12 @@ namespace Test {
   public:
     static Tst_C* last;
     Tst_C (int n) : i(n) {last = this;}
-    virtual ~Tst_C () { printf("deleting C: %d\n",i); }
+    virtual ~Tst_C () {
+      lua_State*L=tolua_state();
+      lua_pushfstring(L,"deleting C: %d",i);
+      lua_pushboolean(L,true);
+      tolua_setproxy(L,-1);
+    }
     virtual char* c () { return "C"; }
   };
   
@@ -79,11 +85,17 @@ namespace Test {
     
     Tst_A a;
     
-    void set_ptr(void* p_ptr) {
-      printf("this is %p, ptr is %p\n", this, p_ptr);
-      ptr = p_ptr;
+    void set_ptr(void* p_ptr){
+      lua_State*L=tolua_state();
+      lua_pushstring(L,"this");
+      lua_pushfstring(L,"%p",this);
+      tolua_setproxy(L,-1);
+      lua_pushstring(L,"ptr");
+      lua_pushfstring(L,"%p",p_ptr);
+      tolua_setproxy(L,-1);
+      ptr=p_ptr;
     };
-    void* get_ptr() {return ptr;};
+    void* get_ptr(){return ptr;};
     
     Tst_E(int) {};
   };
@@ -95,10 +107,15 @@ namespace Test {
   
 }; // end of namespace
 
-static void outside_func(Test::Tst_Outside* p_out, lua_State* ls) {
-  if (p_out) printf("method!\n");
-  else printf("static!\n");
-  //printf("luastate: %i\n", ls);
+static void outside_func(Test::Tst_Outside* p_out, lua_State* ls){
+  lua_State*L=tolua_state();
+  lua_pushstring(L,"flag");
+  if(p_out)lua_pushstring(L,"method");
+  else lua_pushstring(L,"static");
+  tolua_setproxy(L,-1);
+  lua_pushstring(L,"luastate");
+  lua_pushfstring(L,"%i",ls);
+  tolua_setproxy(L,-1);
 };
 
 void init();

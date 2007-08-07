@@ -1,5 +1,6 @@
-
+require"base"
 require"mfunction"
+
 
 local p1,p2=Point(2,3),Point(4,5)
 --for i,v in pairs(Point) do

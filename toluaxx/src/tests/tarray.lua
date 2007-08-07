@@ -6,6 +6,8 @@ init()
 local t=test("Array test")
 --local t=tolua.test("","Array test","")
 
+--t(a[0],0,"a[i]==i i="..tostring(0))
+
 for i=0,9 do
    t(a[i],i,"a[i]==i i="..tostring(i))
 end

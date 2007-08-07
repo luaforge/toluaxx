@@ -1,9 +1,10 @@
-
+require"base"
 require"mdirective"
 
-assert(a==3)
-assert(A==4)
-assert(func()==5)
+t=test("Directive")
+t(a,3,"a == 3 ?")
+t(A,4,"A == 4 ?")
+t(func(),5,"func() == 5 ?")
 
-print("Directive test OK")
+test()
 

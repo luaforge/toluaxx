@@ -1,14 +1,16 @@
-
+require"base"
 require"mconst"
 
-assert(FIRST==M.FIRST)
-assert(FIRST==A.FIRST)
-assert(SECOND==M.SECOND)
-assert(SECOND==A.SECOND)
+local t=test("Const test")
 
-assert(ONE==M.ONE)
-assert(ONE==A.ONE)
-assert(TWO==M.TWO)
-assert(TWO==A.TWO)
+t(FIRST,M.FIRST,"FIRST==M.FIRST")
+t(FIRST,A.FIRST,"FIRST==A.FIRST")
+t(SECOND,M.SECOND,"SECOND==M.SECOND")
+t(SECOND,A.SECOND,"SECOND==A.SECOND")
 
-print("Constant test OK")
+t(ONE,M.ONE,"ONE==M.ONE")
+t(ONE,A.ONE,"ONE==A.ONE")
+t(TWO,M.TWO,"TWO==M.TWO")
+t(TWO,A.TWO,"TWO==A.TWO")
+
+test()

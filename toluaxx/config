@@ -17,7 +17,7 @@ VERSION=5.1
 ## Debug mode
 ## [enable|disable]
 DEBUG=enable
-DEBUG=disable
+#DEBUG=disable
 
 ## Make mode
 ## [test|real]

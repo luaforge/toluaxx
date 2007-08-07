@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.6 2007-07-25 18:02:33 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.7 2007-08-07 17:06:24 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -269,9 +269,9 @@ static int tolua_bnd_getpeer(lua_State* L) {
 
 #ifndef DISABLE_TEST_FRAMEWORK /* toluaxx test framework */
 typedef struct tolua_Test{
-  const char*name;
-  const char*description;
-  const char*author;
+  char*name;
+  char*description;
+  char*author;
   int count;
   int passed;
   int progress;
@@ -287,6 +287,12 @@ typedef struct tolua_TestPass{
   char*description;
   int state;
 } tolua_TestPass;
+#define TOLUA_SET_CSTRING(s,n){						\
+    if(lua_isstring(L,n)){						\
+      s=malloc(lua_objlen(L,n)+1);					\
+      strcpy(s,lua_tostring(L,n));					\
+    }else{ s=NULL; }							\
+  }
 static int tolua_bnd_test_new(lua_State* L){ /* create a new test framework */
   DEBUG_STACK(tolua_bnd_test_new);
   /* arg: test name, test description, test author */
@@ -297,18 +303,37 @@ static int tolua_bnd_test_new(lua_State* L){ /* create a new test framework */
     goto tolua_lerror;
   else{
     tolua_Test*t=malloc(sizeof(tolua_Test));
-    if(lua_isstring(L,2))t->name=lua_tostring(L,2);        else t->name=0;
-    if(lua_isstring(L,3))t->description=lua_tostring(L,3); else t->description=0;
-    if(lua_isstring(L,4))t->author=lua_tostring(L,4);      else t->author=0;
+    TOLUA_SET_CSTRING(t->name,2);
+    TOLUA_SET_CSTRING(t->description,3);
+    TOLUA_SET_CSTRING(t->author,4);
     t->count=0;
     t->passed=0;
-    t->progress=0;
+    t->progress=100;
     tolua_pushusertype(L,(void*)t,"tolua::test");
     /* stack: usertable string|novalue string|novalue string|novalue obj */
   }
   return 1;
  tolua_lerror:
   tolua_error(L,"#ferror in function 'tolua::test::new'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_del(lua_State* L){
+  tolua_Error tolua_err;
+  if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))
+    goto tolua_lerror;
+  else{
+    tolua_Test*self=(tolua_Test*)tolua_tousertype(L,1,0);
+    if(!self)tolua_error(L,"invalid 'self' in function 'test_del'",NULL);
+    else{
+      if(self->name)free(self->name);
+      if(self->description)free(self->description);
+      if(self->author)free(self->author);
+      free(self);
+    }
+  }
+  return 1;
+ tolua_lerror:
+  tolua_error(L,"#ferror in function 'test_del'.",&tolua_err);
   return 0;
 }
 static int tolua_bnd_test_get_name(lua_State* L){ /* test::get_name */
@@ -453,7 +478,7 @@ static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
 	    lua_gettable(L,-2);                  /* stack: {prev} self pass state */
 	    if(!lua_toboolean(L,-1)){  /* check if type error */
 	      lua_pop(L,1);                      /* stack: {prev} self pass */
-	      lua_pushfstring(L,"failed [%d] //",i); /* stack: {prev} self pass msg */
+	      lua_pushfstring(L,"  failed [%d] //",i); /* stack: {prev} self pass msg */
 	      lua_pushstring(L,"description");   /* stack: {prev} self pass msg key */
 	      lua_gettable(L,-3);                /* stack: {prev} self pass msg desc */
 	      lua_pushstring(L,"// type error: received `"); /* stack: {prev} self pass msg desc msg */
@@ -471,7 +496,7 @@ static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
 	      lua_gettable(L,-2);                /* stack: {prev} self pass state */
 	      if(!lua_toboolean(L,-1)){ /* check if value error */
 		lua_pop(L,1);                    /* stack: {prev} self pass */
-		lua_pushfstring(L,"failed [%d] //",i); /* stack: {prev} self pass msg */
+		lua_pushfstring(L,"  failed [%d] //",i); /* stack: {prev} self pass msg */
 		lua_pushstring(L,"description"); /* stack: {prev} self pass msg key */
 		lua_gettable(L,-3);              /* stack: {prev} self pass msg desc */
 		lua_pushstring(L,"// value error: received `"); /* stack: msg self pass msg desc msg */
@@ -553,7 +578,7 @@ static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
       DEBUG(tolua_typename(L,2)); /* self rv ev desc rvt */
       DEBUG(tolua_typename(L,3)); /* self rv ev desc rvt evt */
       /* create a new pass result table and place it in peer */
-      DEBUG(lua_newtable(L));                       /* self rv ev desc rvt evt pass */
+      DEBUG(lua_newtable(L));                       /* self rv|nv ev|nv desc|nv rvt evt pass */
       DEBUG(lua_getfenv(L,1));                      /* self rv ev desc rvt evt pass env */
       DEBUG(lua_pushnumber(L,self->count));         /* self rv ev desc rvt evt pass env num */
       DEBUG(lua_pushvalue(L,-3));                   /* self rv ev desc rvt evt pass env num pass */
@@ -599,7 +624,7 @@ static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
   tolua_error(L,"#ferror in function 'assert'.",&tolua_err);
   return 0;
 }
-#endif
+#endif /* #ifndef DISABLE_TEST_FRAMEWORK */
 
 TOLUA_API const char* tolua_stackexplore(lua_State* L){
   unsigned int i;
@@ -926,6 +951,7 @@ TOLUA_API void tolua_open (lua_State* L){
     tolua_beginmodule(L,"test");
     tolua_function(L,"new",        tolua_bnd_test_new);
     tolua_function(L,".call",      tolua_bnd_test_new);
+    tolua_function(L,"delete",     tolua_bnd_test_del);
     tolua_function(L,".len",       tolua_bnd_test_get_count);
     tolua_function(L,"accert",     tolua_bnd_test_assert);
     tolua_function(L,".callself",  tolua_bnd_test_assert);
