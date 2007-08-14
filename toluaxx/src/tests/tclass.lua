@@ -146,7 +146,6 @@ t(o.pc1,nil,"protected: private: pc1")
 t(o.pc2,nil,"private: protected: pc2")
 t(o.pc3,333,"protected: public: pc3")
 
-
 dest()
 
 test()

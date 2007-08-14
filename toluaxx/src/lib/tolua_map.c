@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.7 2007-08-07 17:06:24 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.8 2007-08-14 08:54:56 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -443,9 +443,12 @@ static int tolua_bnd_test_get_result(lua_State* L){ /* test::get_result */
     tolua_Test*self=(tolua_Test*)tolua_tousertype(L,1,0);
     if(!self)tolua_error(L,"invalid 'self' in function 'get_result'",NULL);
     else{
-      lua_pushfstring(L,"%s :: %s @ %s - [%d/%d] %d%% passed..",
+    /*  lua_pushfstring(L,"%s :: %s @ %s - [%d/%d] %d%% passed..",
 		      self->name,self->description,self->author,
-		      self->passed,self->count,self->progress);
+    		      self->passed,self->count,self->progress);*/
+	lua_pushfstring(L,"%s :: %s - [%d/%d] %d%% passed..",
+		      self->name,self->description,
+    		      self->passed,self->count,self->progress);
     }
   }
   return 1;
@@ -474,11 +477,11 @@ static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
 	  DEBUG(lua_gettable(L,-2));                    /* stack: {prev} self pass state */
 	  if(!lua_toboolean(L,-1)){              /* check if error state */
 	    lua_pop(L,1);                        /* stack: {prev} self pass */
-	    lua_pushstring(L,"checktype");       /* stack: {prev} self pass key */
+	    lua_pushstring(L,"check_type");      /* stack: {prev} self pass key */
 	    lua_gettable(L,-2);                  /* stack: {prev} self pass state */
 	    if(!lua_toboolean(L,-1)){  /* check if type error */
 	      lua_pop(L,1);                      /* stack: {prev} self pass */
-	      lua_pushfstring(L,"  failed [%d] //",i); /* stack: {prev} self pass msg */
+	      lua_pushfstring(L,"  failed [%d] //",i+1); /* stack: {prev} self pass msg */
 	      lua_pushstring(L,"description");   /* stack: {prev} self pass msg key */
 	      lua_gettable(L,-3);                /* stack: {prev} self pass msg desc */
 	      lua_pushstring(L,"// type error: received `"); /* stack: {prev} self pass msg desc msg */
@@ -492,11 +495,11 @@ static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
 	      lua_remove(L,-2);                  /* stack: {prev} self msg */
 	    }else{
 	      lua_pop(L,1);                      /* stack: {prev} self pass */
-	      lua_pushstring(L,"checkvalue");    /* stack: {prev} self pass key */
+	      lua_pushstring(L,"check_value");   /* stack: {prev} self pass key */
 	      lua_gettable(L,-2);                /* stack: {prev} self pass state */
 	      if(!lua_toboolean(L,-1)){ /* check if value error */
 		lua_pop(L,1);                    /* stack: {prev} self pass */
-		lua_pushfstring(L,"  failed [%d] //",i); /* stack: {prev} self pass msg */
+		lua_pushfstring(L,"  failed [%d] //",i+1); /* stack: {prev} self pass msg */
 		lua_pushstring(L,"description"); /* stack: {prev} self pass msg key */
 		lua_gettable(L,-3);              /* stack: {prev} self pass msg desc */
 		lua_pushstring(L,"// value error: received `"); /* stack: msg self pass msg desc msg */
@@ -547,8 +550,8 @@ static int tolua_bnd_test_get_report(lua_State* L){ /* test::get_report */
     if(!self)tolua_error(L,"invalid 'self' in function 'get_report'",NULL);
     else{
       tolua_bnd_test_get_errors(L);                            /* stack: self <str> errmsg */
-      lua_pushfstring(L,"%s :: %s @ %s - [%d/%d] %d%% passed..",
-		      self->name,self->description,self->author,
+      lua_pushfstring(L,"%s :: %s - [%d/%d] %d%% passed..",
+		      self->name,self->description,
 		      self->passed,self->count,self->progress);/* stack: self <str> errmsg resmsg */
       lua_insert(L,-2);                                        /* stack: self <str> resmsg errmsg */
       lua_pushstring(L,lua_objlen(L,-1)?"\n":"");              /* stack: self <str> resmsg errmsg \n */
@@ -564,10 +567,10 @@ static int tolua_bnd_test_get_report(lua_State* L){ /* test::get_report */
 static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
   DEBUG_STACK(tolua_bnd_test_assert(lua_State* L));
   tolua_Error tolua_err;
-  if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err)||
-     !tolua_isstring(L,4,0,&tolua_err)||
+  if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))goto tolua_lerror;
+  if(!tolua_isstring(L,4,0,&tolua_err)||
      !tolua_isnoobj(L,5,&tolua_err))
-    goto tolua_lerror;
+    return tolua_bnd_test_get_passed(L);
   else{
     tolua_Test*self=(tolua_Test*)tolua_tousertype(L,1,0);
     /*char*tolua_desc=tolua_tostring(tolua_S,4,0);*/
@@ -602,11 +605,11 @@ static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
       DEBUG(lua_pushvalue(L,4));                    /* self rv ev desc rvt evt pass key desc */
       DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
       /* check types */
-      DEBUG(lua_pushstring(L,"checktype"));         /* self rv ev desc rvt evt pass key */
+      DEBUG(lua_pushstring(L,"check_type"));        /* self rv ev desc rvt evt pass key */
       DEBUG(lua_pushboolean(L,lua_equal(L,5,6)));   /* self rv ev desc rvt evt pass key state */
       DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
       /* check values */
-      DEBUG(lua_pushstring(L,"checkvalue"));        /* self rv ev desc rvt evt pass key */
+      DEBUG(lua_pushstring(L,"check_value"));       /* self rv ev desc rvt evt pass key */
       DEBUG(lua_pushboolean(L,lua_equal(L,2,3)));   /* self rv ev desc rvt evt pass key state */
       DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
       /* check all */

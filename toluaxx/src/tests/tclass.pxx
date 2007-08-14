@@ -111,6 +111,7 @@ class HiddenFields{
  protected:
  public:
   int pc3;
+  HiddenFields();
 };
 
 void init();
