@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.9 2007-08-14 09:12:01 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.10 2007-08-14 10:36:19 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -602,11 +602,11 @@ static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
       /* check types */
       lua_pushstring(L,"check_type");        /* self rv ev desc rvt evt pass key */
       lua_pushboolean(L,lua_equal(L,5,6));   /* self rv ev desc rvt evt pass key state */
-      lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
       /* check values */
       lua_pushstring(L,"check_value");       /* self rv ev desc rvt evt pass key */
       lua_pushboolean(L,lua_equal(L,2,3));   /* self rv ev desc rvt evt pass key state */
-      lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
       /* check all */
       int b=lua_equal(L,2,3)&&lua_equal(L,5,6)?1:0;
       self->passed=self->passed+b;

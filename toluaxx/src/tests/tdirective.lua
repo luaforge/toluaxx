@@ -2,9 +2,10 @@ require"base"
 require"mdirective"
 
 t=test("Directive")
-t(a,3,"a == 3 ?")
-t(A,4,"A == 4 ?")
-t(func(),5,"func() == 5 ?")
+t(a,3,"embedded cxx code $< .... $>")
+t(A,4,"embedded lua code $[ .... $]")
+t(func(),5,"$lfile")
+t(d,13,"$hfile")
 
 test()
 

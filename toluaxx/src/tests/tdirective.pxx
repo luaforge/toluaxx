@@ -4,6 +4,8 @@ $extern int a;
 
 $pfile"idirective.pxx"
 
+$hfile"tdirective.hxx"
+
 $<
  a = 3;
 $>
