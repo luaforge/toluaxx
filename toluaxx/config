@@ -5,6 +5,10 @@
 NAME=toluaxx
 VERSION=5.1
 
+TOLUA_VERSION=1.14-alpha
+TOLUA_RELEASE=mutagenese
+TOLUA_AUTHORS=W. Celes, A. Manzur, PhoeniX11 Kayo
+
 ## Install prefix
 ## for posix [/usr]
 # PREFIX=

@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_class.lua,v 1.3 2007-07-23 18:57:29 phoenix11 Exp $
+-- $Id: tlx_class.lua,v 1.4 2007-08-14 06:46:56 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -247,7 +247,14 @@ function Class (n,p,b)
    --<<<<-----------------------------------------------------------------------<<<<--
    
    push(c)
-   c:parse(strsub(b,2,strlen(b)-1)) -- eliminate braces
+   
+   local s=strsub(b,2,strlen(b)-1)
+   
+   -- hide private: and protected: visibility fields
+   s=s:gsub("(\n)(%sprotected:(.-)(%spublic:))","%1%4")                            
+   s=s:gsub("(\n)(%sprivate:(.-)(%spublic:))","%1%4")
+
+   c:parse(s) -- eliminate braces
    pop()
 end
 

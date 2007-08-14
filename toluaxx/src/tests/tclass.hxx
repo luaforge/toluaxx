@@ -120,3 +120,35 @@ static void outside_func(Test::Tst_Outside* p_out, lua_State* ls){
 
 void init();
 void dest();
+
+//tolua_begin
+class HiddenFields{
+ protected:
+  int pa1;
+ private:
+  int pa2;
+ public:
+  int pa3;
+ private:
+ protected:
+ private:
+  int pb1;
+ protected:
+  int pb2;
+ protected:
+ private:
+ public:
+  int pb3;
+ protected:
+ private:
+  int pc1;
+ private:
+ protected:
+  int pc2;
+ protected:
+ public:
+  int pc3;
+ public:
+  HiddenFields():pa1(1),pa2(2),pa3(3),pb1(11),pb2(22),pb3(33),pc1(111),pc2(222),pc3(333){}
+};
+//tolua_end

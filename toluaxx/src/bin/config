@@ -43,14 +43,18 @@ tlx_clean.lua \
 tlx_custom.lua \
 tlx_doit.lua \
 tlx_cmd.lua \
+tlx_license.lua \
 tlx_main.lua)
 
-
-ifeq ($(DEBUG),disable)
-  BIND=enable
-else
-#bin.postpare: src/bin/toluaxx.bind.cxx # deprecated
-endif
+bin.prepare: src/bin/lua/tlx_config.lua
+	@echo ToLuaXX config prepared..
+src/bin/lua/tlx_config.lua:
+	@echo -- configuration file -- > $@
+	@echo tolua=tolua or {} >> $@
+	@echo tolua.version=[=[$(TOLUA_VERSION)]=] >> $@
+	@echo tolua.release=[=[$(TOLUA_RELEASE)]=] >> $@
+	@echo tolua.authors=[=[$(TOLUA_AUTHORS)]=] >> $@
+.PHONY: src/bin/lua/tlx_config.lua
 
 ifeq ($(SYMLINK),enable)
 $(PREFIX)/bin/$(NAME): $(PREFIX)/bin/$(bin.name).run

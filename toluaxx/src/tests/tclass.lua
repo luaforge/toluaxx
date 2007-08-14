@@ -133,6 +133,20 @@ for i=1,100000 do
    tolua.inherit(la,a)
 end
 
+-- hidden class fields
+local t=test("Class :: hidden fields")
+local o=HiddenFields()
+t(o.pa1,nil,"protected: pa1")
+t(o.pa2,nil,"private: pa2")
+t(o.pa3,3,"public: pa3")
+t(o.pb1,nil,"private: protected: private: pb1")
+t(o.pb2,nil,"protected: pb2")
+t(o.pb3,33,"protected: private: public: pb3")
+t(o.pc1,nil,"protected: private: pc1")
+t(o.pc2,nil,"private: protected: pc2")
+t(o.pc3,333,"protected: public: pc3")
+
+
 dest()
 
 test()

@@ -85,7 +85,33 @@ namespace Test {
 
 }; // end of namespace
 
-
+class HiddenFields{
+ protected:
+  int pa1;
+ private:
+  int pa2;
+ public:
+  int pa3;
+ private:
+ protected:
+ private:
+  int pb1;
+ protected:
+  int pb2;
+ protected:
+ private:
+ public:
+  int pb3;
+ protected:
+ private:
+  int pc1;
+ private:
+ protected:
+  int pc2;
+ protected:
+ public:
+  int pc3;
+};
 
 void init();
 void dest();

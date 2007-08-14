@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_package.lua,v 1.4 2007-07-25 18:02:33 phoenix11 Exp $
+-- $Id: tlx_package.lua,v 1.5 2007-08-14 06:46:56 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -260,6 +260,7 @@ end
 -- *** Thanks to Ariel Manzur for fixing bugs in nested directives ***
 function extract_code(fn,s)
    local code='\n$#include "'..fn..'"\n'
+   
    s="\n"..s.."\n" -- add blank lines as sentinels
    local _,e,c,t=strfind(s,"\n([^\n]-)[Tt][Oo][Ll][Uu][Aa]_([^%s]*)[^\n]*\n")
    while e do
