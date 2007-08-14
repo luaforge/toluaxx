@@ -15,6 +15,10 @@ ifndef PREFIX
   PREFIX=c\:/GNUtools/mingw
 endif
 
+ifndef LUAC
+  LUAC=luac
+endif
+
 SYMLINK=disable
 
 NVERSION=$(subst .,,$(VERSION))
@@ -45,6 +49,10 @@ AXT=a
 # Ranable Linker
 RL=g++ $(1) -o $(2) $(3)
 RXT=exe
+
+# Lunable Builder
+LL=$(LUAC) -o bin/$(2) $(1)
+LXT=run
 
 # Shader Linker
 SL=g++ -shared $(1) -o $(2) $(3) 

@@ -15,6 +15,10 @@ ifndef PREFIX
   PREFIX=
 endif
 
+ifndef LUAC
+  LUAC=luac
+endif
+
 ifndef VSPATH
   VSPATH="C:\Program Files\Microsoft Visual Studio 8"
 endif
@@ -69,6 +73,10 @@ AXT=lib
 # Ranable Linker
 RL=link /NOLOGO $(1) /OUT:$(2) $(3)
 RXT=exe
+
+# Lunable Builder
+LL=$(LUAC) -o bin/$(2) $(1)
+LXT=run
 
 # Shader Linker
 SL=link /NOLOGO $(1) /dll /OUT:$(2) $(3)

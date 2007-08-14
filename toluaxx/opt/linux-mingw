@@ -59,6 +59,10 @@ AXT=a
 RL=$(MINGW_NAME)-g++ $(1) -o $(2) $(3)
 RXT=exe
 
+# Lunable Builder
+LL=echo "\#!/usr/bin/env lua5.1" > $(2) && luac5.1 -o obj/toluaxx.luac $(1) && cat obj/toluaxx.luac >> $(2) && rm -f obj/toluaxx.luac && chmod 755 $(2)
+LXT=run
+
 # Shader Linker
 SL=$(MINGW_NAME)-g++ -shared $(1) -o $(2) $(3)
 SXT=dll
