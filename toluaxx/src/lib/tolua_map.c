@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.8 2007-08-14 08:54:56 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.9 2007-08-14 09:12:01 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -294,7 +294,6 @@ typedef struct tolua_TestPass{
     }else{ s=NULL; }							\
   }
 static int tolua_bnd_test_new(lua_State* L){ /* create a new test framework */
-  DEBUG_STACK(tolua_bnd_test_new);
   /* arg: test name, test description, test author */
   /* stack: usertable string|novalue string|novalue string|novalue */
   tolua_Error tolua_err;
@@ -351,7 +350,6 @@ static int tolua_bnd_test_get_name(lua_State* L){ /* test::get_name */
   return 0;
 }
 static int tolua_bnd_test_get_description(lua_State* L){ /* test::get_description */
-  DEBUG_STACK(static int tolua_bnd_test_get_description(lua_State* L));
   tolua_Error tolua_err;
   if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))
     goto tolua_lerror;
@@ -457,7 +455,6 @@ static int tolua_bnd_test_get_result(lua_State* L){ /* test::get_result */
   return 0;
 }
 static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
-  DEBUG_STACK(tolua_bnd_test_get_errors);
   tolua_Error tolua_err;
   if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))
     goto tolua_lerror;
@@ -470,11 +467,10 @@ static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
       if(self->passed==self->count){
       }else{ int i;
 	for(i=0;i<self->count;i++){
-	  DEBUG_FUNC(New Stage);
-	  DEBUG(lua_pushnumber(L,i+1));          /* stack: {prev} self index */
-	  DEBUG(lua_gettable(L,-2));             /* stack: {prev} self pass */
-	  DEBUG(lua_pushstring(L,"state"));             /* stack: {prev} self pass key */
-	  DEBUG(lua_gettable(L,-2));                    /* stack: {prev} self pass state */
+	  lua_pushnumber(L,i+1);                 /* stack: {prev} self index */
+	  lua_gettable(L,-2);                    /* stack: {prev} self pass */
+	  lua_pushstring(L,"state");             /* stack: {prev} self pass key */
+	  lua_gettable(L,-2);                    /* stack: {prev} self pass state */
 	  if(!lua_toboolean(L,-1)){              /* check if error state */
 	    lua_pop(L,1);                        /* stack: {prev} self pass */
 	    lua_pushstring(L,"check_type");      /* stack: {prev} self pass key */
@@ -565,7 +561,6 @@ static int tolua_bnd_test_get_report(lua_State* L){ /* test::get_report */
   return 0;
 }
 static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
-  DEBUG_STACK(tolua_bnd_test_assert(lua_State* L));
   tolua_Error tolua_err;
   if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))goto tolua_lerror;
   if(!tolua_isstring(L,4,0,&tolua_err)||
@@ -578,46 +573,46 @@ static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
     else{
       self->count=self->count+1;
       /* give types */
-      DEBUG(tolua_typename(L,2)); /* self rv ev desc rvt */
-      DEBUG(tolua_typename(L,3)); /* self rv ev desc rvt evt */
+      tolua_typename(L,2); /* self rv ev desc rvt */
+      tolua_typename(L,3); /* self rv ev desc rvt evt */
       /* create a new pass result table and place it in peer */
-      DEBUG(lua_newtable(L));                       /* self rv|nv ev|nv desc|nv rvt evt pass */
-      DEBUG(lua_getfenv(L,1));                      /* self rv ev desc rvt evt pass env */
-      DEBUG(lua_pushnumber(L,self->count));         /* self rv ev desc rvt evt pass env num */
-      DEBUG(lua_pushvalue(L,-3));                   /* self rv ev desc rvt evt pass env num pass */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass env */
-      DEBUG(lua_pop(L,1));                          /* self rv ev desc rvt evt pass */
+      lua_newtable(L);                       /* self rv|nv ev|nv desc|nv rvt evt pass */
+      lua_getfenv(L,1);                      /* self rv ev desc rvt evt pass env */
+      lua_pushnumber(L,self->count);         /* self rv ev desc rvt evt pass env num */
+      lua_pushvalue(L,-3);                   /* self rv ev desc rvt evt pass env num pass */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass env */
+      lua_pop(L,1);                          /* self rv ev desc rvt evt pass */
       /* save test pass result in pass table */
-      DEBUG(lua_pushstring(L,"received_value"));    /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushvalue(L,2));                    /* self rv ev desc rvt evt pass key value */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
-      DEBUG(lua_pushstring(L,"expected_value"));    /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushvalue(L,3));                    /* self rv ev desc rvt evt pass key value */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
-      DEBUG(lua_pushstring(L,"received_type"));     /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushvalue(L,5));                    /* self rv ev desc rvt evt pass key type */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
-      DEBUG(lua_pushstring(L,"expected_type"));     /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushvalue(L,6));                    /* self rv ev desc rvt evt pass key type */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"received_value");    /* self rv ev desc rvt evt pass key */
+      lua_pushvalue(L,2);                    /* self rv ev desc rvt evt pass key value */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"expected_value");    /* self rv ev desc rvt evt pass key */
+      lua_pushvalue(L,3);                    /* self rv ev desc rvt evt pass key value */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"received_type");     /* self rv ev desc rvt evt pass key */
+      lua_pushvalue(L,5);                    /* self rv ev desc rvt evt pass key type */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"expected_type");     /* self rv ev desc rvt evt pass key */
+      lua_pushvalue(L,6);                    /* self rv ev desc rvt evt pass key type */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
       /* save test pass description */
-      DEBUG(lua_pushstring(L,"description"));       /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushvalue(L,4));                    /* self rv ev desc rvt evt pass key desc */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"description");       /* self rv ev desc rvt evt pass key */
+      lua_pushvalue(L,4);                    /* self rv ev desc rvt evt pass key desc */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
       /* check types */
-      DEBUG(lua_pushstring(L,"check_type"));        /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushboolean(L,lua_equal(L,5,6)));   /* self rv ev desc rvt evt pass key state */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"check_type");        /* self rv ev desc rvt evt pass key */
+      lua_pushboolean(L,lua_equal(L,5,6));   /* self rv ev desc rvt evt pass key state */
+      lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
       /* check values */
-      DEBUG(lua_pushstring(L,"check_value"));       /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushboolean(L,lua_equal(L,2,3)));   /* self rv ev desc rvt evt pass key state */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"check_value");       /* self rv ev desc rvt evt pass key */
+      lua_pushboolean(L,lua_equal(L,2,3));   /* self rv ev desc rvt evt pass key state */
+      lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
       /* check all */
       int b=lua_equal(L,2,3)&&lua_equal(L,5,6)?1:0;
       self->passed=self->passed+b;
-      DEBUG(lua_pushstring(L,"state"));             /* self rv ev desc rvt evt pass key */
-      DEBUG(lua_pushboolean(L,b));                  /* self rv ev desc rvt evt pass key state */
-      DEBUG(lua_settable(L,-3));                    /* self rv ev desc rvt evt pass */
+      lua_pushstring(L,"state");             /* self rv ev desc rvt evt pass key */
+      lua_pushboolean(L,b);                  /* self rv ev desc rvt evt pass key state */
+      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
       /* persent passed (progress) */
       self->progress=self->passed*100/self->count;
     }
