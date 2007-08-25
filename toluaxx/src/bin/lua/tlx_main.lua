@@ -2,7 +2,7 @@
 -- Written by PhoeniX11 Kayo
 -- RareSky
 -- Jul 2007
--- $Id: tlx_main.lua,v 1.3 2007-08-14 06:46:56 phoenix11 Exp $
+-- $Id: tlx_main.lua,v 1.4 2007-08-25 11:07:04 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -12,8 +12,8 @@
 
 function _(s) return s end
 
-function main(a)
-   c=Cmd(a) -- Check command line arguments
+function cmdline_process(a)
+   local c=Cmd(a) -- Check command line arguments
    c("version",     {"-v","--version"       }, _("print version information"))
    c("author",      {"-d","--authors"       }, _("print developer information"))
    c("license",     {"-l","--license"       }, _("print license information"))
@@ -40,6 +40,28 @@ function main(a)
    --protected_destructor?
    --
    --c:print()
+   
+   return c
+end
+
+function cmdline_postproc(c)
+   _extra_parameters=_extra_parameters or {}
+   flags=flags or {}
+   
+   if c.opt.extraval then
+      for k,v in pairs(c.opt.extraval) do
+	 _extra_parameters[k]=v
+      end
+   end
+   if c.opt then
+      for k,v in pairs(c.opt) do
+	 flags[k]=v
+      end
+   end
+end
+
+function main(a)
+   local c=cmdline_process(a)
    
    tolua.name=c.code
    tolua.lua_name=string.match(_VERSION,"%S-(.+)%s+")
@@ -87,9 +109,8 @@ function main(a)
       return 0
    end
    
-   _extra_parameters=c.opt.extraval
-   flags=c.opt
-   
+   cmdline_postproc(c)
+
    local err,msg = xpcall(doit, debug.traceback)
    if not err then
       --print("**** msg is "..tostring(msg))

@@ -1,7 +1,7 @@
 #include "tvariable.hxx"
 
 int i = 1;
-float f = 2.0f;;
+float f = 2.0f;
 double d = 3.0;
 char* s = "Hello world";
 void* v = (void*)1;
@@ -17,16 +17,16 @@ double md = 23.0;
 char* ms = "Hello world in module";
 void* mv = NULL;
 string mn = "Hi there in module";
-A ma = {31,32.0f,33.0,"Hello world from class in module",
-	NULL,"Hi there from class in module"};
+A ma={31,32.0f,33.0,"Hello world from class in module",
+      NULL,"Hi there from class in module"};
 B* mb;
 
 B bb;
 B bbb;
 
 void init(){
-  bb.a = a;   bb.b=NULL;
-  bbb.a = ma; bbb.b=&bb;
-  b = &bb;
-  mb = &bbb;
+  bb.a=a;   bb.b=NULL;
+  bbb.a=ma; bbb.b=&bb;
+  b=&bb;
+  mb=&bbb;
 }

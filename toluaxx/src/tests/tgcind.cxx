@@ -1,7 +1,12 @@
 #include"tgcind.hxx"
-#include<iostream>
+#include"toluaxx.h"
 
-#define LOGOUT(m,t) {std::cout<<"DEBUG TRACE: "<<#m<<" "<<t<<""<<std::endl;}
+#define LOGOUT(m,t) {						\
+    lua_State*L=tolua_state();					\
+    lua_pushstring(L,#m);					\
+    lua_pushstring(L,t.data());					\
+    tolua_setproxy(L,-1);					\
+  }
 
 string ident(void*o){
   char b[32];
@@ -10,11 +15,13 @@ string ident(void*o){
 }
 
 OBJ::OBJ(){
-  LOGOUT(new object,ident(this));
+  //LOGOUT(new OBJ,ident(this));
+  data=new char[1048576];
 }
 
 OBJ::~OBJ(){
-  LOGOUT(delete object,ident(this));
+  //LOGOUT(delete OBJ,ident(this));
+  delete[]data;
 }
 
 OBJ::operator string(){
@@ -23,11 +30,11 @@ OBJ::operator string(){
 
 
 GRP::GRP():OBJ(){
-  
+  //LOGOUT(new GRP,ident(this));
 }
 
 GRP::~GRP(){
-  
+  //LOGOUT(delete GRP,ident(this));
 }
 
 OBJ *& GRP::operator[](string n){
@@ -35,7 +42,7 @@ OBJ *& GRP::operator[](string n){
   return pool[n];
 }
 
-void GRP::operator()(string&n/**="" asnil**/,OBJ*&o/**=NULL**/){
+void GRP::operator()(string&n/*$="" asnil$*/,OBJ*&o/*$=NULL$*/){
   ITER t;
   if(n==""){
     t=pool.begin();

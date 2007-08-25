@@ -86,6 +86,7 @@ namespace Test {
 }; // end of namespace
 
 class HiddenFields{
+  int pa;
  protected:
   int pa1;
  private:

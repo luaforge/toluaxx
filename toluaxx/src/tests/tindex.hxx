@@ -15,7 +15,7 @@ class ELEM{//tolua_export
   string operator~(){return v;}
   bool operator()(){return e!=NULL;}
   bool operator==(const ELEM& e){return(this==&e);}
-  void value(int*_i/**=0**/,string*_v/**=""**/,ELEM*&_e/**=NULL**/){
+  void value(int*_i/*$=0$*/,string*_v/*$=""$*/,ELEM*&_e/*$=NULL$*/){
     if(*_i!=0)i=*_i;
     if(*_v!="")v=*_v;
     if(_e!=NULL)e=_e;
@@ -35,7 +35,7 @@ class NUM_MAP{//tolua_export
   NUM_MAP(){}
   NUM_MAP(int i){}
   ELEM * & operator[](int i){if(pool.find(i)==pool.end())pool[i]=NULL; return pool[i];}
-  void operator()(int&i/**=0 asnil**/,ELEM*&e/**=NULL**/){
+  void operator()(int&i/*$=0 asnil$*/,ELEM*&e/*$=NULL$*/){
     map<int,ELEM*>::iterator t;
     if(i==0){
       t=pool.begin();
@@ -77,7 +77,7 @@ class STR_MAP{//tolua_export
   STR_MAP(){}
   ~STR_MAP(){}
   ELEM * & operator[](string i){if(pool.find(i)==pool.end())pool[i]=NULL; return pool[i];}
-  void operator()(string&i/**="" asnil**/,ELEM*&e/**=NULL**/){
+  void operator()(string&i/*$="" asnil$*/,ELEM*&e/*$=NULL$*/){
     map<string,ELEM*>::iterator t;
     if(i==""){
       t=pool.begin();
@@ -131,19 +131,19 @@ public:
   TST();
   ~TST();
   int test(){return 1;}
-  /**tolua_getindex {**/
+  /*$tolua_getindex {$*/
   ELEM* getelem(string);
   OBJ* getobj(string);
-  int getnum(string)/**=0 asnil**/;
-  string getstr(string)/**="" asnil**/;
-  /**}**/
-  /**tolua_setindex {**/
+  int getnum(string)/*$=0 asnil$*/;
+  string getstr(string)/*$="" asnil$*/;
+  /*$}$*/
+  /*$tolua_setindex {$*/
   void setelem(string,ELEM*);
   void setobj(string,OBJ*);
-  void setnum(string,int n/**=0 asnil**/);
+  void setnum(string,int n/*$=0 asnil$*/);
   void setstr(string,string s/**="" asnil**/);
   void delvar(string,void*);
-  /**}**/
+  /*$}$*/
 };
 //tolua_end
 
@@ -164,17 +164,17 @@ public:
   bool isnum(string);
   bool isstr(string);
   bool isbool(string);
-  /**tolua_getindex {**/
-  void getnum(string,int* /**num=self->nonum asnil**/);
-  void getstr(string,string* /**str=self->nostr asnil**/);
-  void getbool(string,bool* /**b=self->nobool asnil**/);
-  /**}**/
-  /**tolua_setindex {**/
+  /*$tolua_getindex {$*/
+  void getnum(string,int* /*$num=self->nonum asnil$*/);
+  void getstr(string,string* /*$str=self->nostr asnil$*/);
+  void getbool(string,bool* /*$b=self->nobool asnil$*/);
+  /*$}$*/
+  /*$tolua_setindex {$*/
   void setnum(string,int n);
   void setstr(string,string s);
   void setbool(string,bool b);
   void delvar(string,void*n);
-  /**}**/
+  /*$}$*/
 };
 //tolua_end
 

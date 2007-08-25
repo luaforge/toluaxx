@@ -17,12 +17,12 @@ class OBJECT{
   OBJECT* parent;
   string name;
   int live;
-  float mass;
+  double mass;
   
   OBJECT():parent(NULL),live(0),mass(0.0f){}
   virtual ~OBJECT(){}
   
-  string fullname(string n=""/** asnil**/);
+  string fullname(string n=""/*$ asnil$*/);
   
   virtual operator string();
 };
@@ -35,13 +35,13 @@ class GROUP: public OBJECT{
   virtual ~GROUP(){}
   string children();
   
-  virtual void operator()(string&/**k="" asnil**/,OBJECT*&);
-  /**tolua_getindex {**/
+  virtual void operator()(string&/*$k="" asnil$*/,OBJECT*&);
+  /*$tolua_getindex {$*/
   virtual OBJECT* getobject(string);
-  /**}**/
-  /**tolua_setindex {**/
+  /*$}$*/
+  /*$tolua_setindex {$*/
   virtual void setobject(string, OBJECT*);
-  /**}**/
+  /*$}$*/
   virtual operator string();
 };
 

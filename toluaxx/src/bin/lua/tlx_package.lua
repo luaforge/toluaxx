@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_package.lua,v 1.5 2007-08-14 06:46:56 phoenix11 Exp $
+-- $Id: tlx_package.lua,v 1.6 2007-08-25 11:07:04 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -287,7 +287,8 @@ function extract_code(fn,s)
       _,e,c,t=strfind(s,"\n([^\n]-)[Tt][Oo][Ll][Uu][Aa]_([^%s]*)[^\n]*\n",e)
    end
    --- ancomment /** **/ ---
-   code=string.gsub(code,"%/%*%*(.-)%*%*%/","%1")
+   --code=string.gsub(code,"%/%*%*(.-)%*%*%/","%1")
+   code=string.gsub(code,"%/%*%$(.-)%$%*%/","%1")
    return code
 end
 
@@ -318,6 +319,23 @@ function Package (name,input)
 	 chunk = extract_code(ifn,chunk)
       end
       
+      -- $arg directive process
+      repeat
+	 chunk,nsubst = gsub(chunk,'(\n%s*%$arg%s*([^\n]*))',
+			     function(code,args)
+				local arg={}
+				gsub(args,'([^%s]+)',
+				     function(a)
+					arg[#arg+1]=a
+				     end)
+				local c=cmdline_process(arg)
+				cmdline_postproc(c)
+				return ''
+			     end)
+      until nsubst==0
+
+      --print("[[[[[["..chunk.."]]]]]]")
+
       -- close file
       if ifn then
 	 readfrom()
@@ -326,7 +344,7 @@ function Package (name,input)
       -- deal with include directive
       local nsubst
       repeat
-	 chunk,nsubst = gsub(chunk,'\n%s*%$(.)file%s*"(.-)"([^\n]*)\n',
+	 chunk,nsubst = gsub(chunk,'\n%s*%$(.)file%s*"(.-)"([^\n]*)',
 			    function(kind,fn,extra)
 			       local _,_,ext=strfind(fn,".*%.(.*)$")
 			       local _fn=extract_path(ifn)..fn

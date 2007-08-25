@@ -2,7 +2,7 @@
 -- Written by Waldemar Celes
 -- TeCGraf/PUC-Rio
 -- Jul 1998
--- $Id: tlx_class.lua,v 1.4 2007-08-14 06:46:56 phoenix11 Exp $
+-- $Id: tlx_class.lua,v 1.5 2007-08-25 11:07:04 phoenix11 Exp $
 
 -- This code is free software; you can redistribute it and/or modify it.
 -- The software provided hereunder is on an "as is" basis, and
@@ -213,10 +213,27 @@ function Class (n,p,b)
       append_global_type(ft, c)
    end
    
+   push(c)
+   
+   local s=strsub(b,2,strlen(b)-1)
+   
+   -- hide private: and protected: visibility fields
+   --print("[[[[["..s.."]]]]]")
+   s=s:gsub("\n%s-protected:(.-)(\n%s-public:)","%2")
+   --print("[[[[["..s.."]]]]]")
+   s=s:gsub("\n%s-private:(.-)(\n%s-public:)","%2")
+   --print("[[[[["..s.."]]]]]")
+   s=s:gsub("\n%s-protected:(.-)$","\n")
+   --print("[[[[["..s.."]]]]]")
+   s=s:gsub("\n%s-private:(.-)$","\n")
+   --print("[[[[["..s.."]]]]]")
+   s=s:gsub("\n%s-public:%s-\n","\n")
+   --print("[[[[["..s.."]]]]]")
+
    -->>>>----------------------------------------------------------------------->>>>--
    -- Adding automatic generation of constructor, destructor and sizeof functions (KS)
    -- Thanks KS
-   if flags.autogen then -- no debuged
+   if flags.autogen then -- debuged
       --c._new=false
       --c._delete=false
       --c._sizeof=false
@@ -224,35 +241,30 @@ function Class (n,p,b)
       -- begin adding
       if b ~= '' then
 	 if not c._new then
-	    hackeyShit = n..'();'
+	    s=s.."\n"..n..'();'
 	    print('Didnt find constructor, adding one')
-	    c:parse(hackeyShit);
+	    --c:parse(hackeyShit);
 	 end
 	 if not c._delete then
-	    hackeyShit ='~'..n..'();'
+	    s=s.."\n"..'~'..n..'();'
 	    print('Didnt find destructor, adding one')
-	    c:parse(hackeyShit);
+	    --c:parse(hackeyShit);
 	 end
+	 -- disabled by PhoeniX11 ------>>>>>>------
 	 -- add a SIZEOF() function
-	 if not c._sizeof then
+	 --if not c._sizeof then
 	    --print('Adding sizeof function')
-	    sizeofFunc = 'DWORD SIZEOF();'
-	    c:parse(sizeofFunc)
+	    --s=s.."\n"..'unsigned int sizeof();'
+	    --c:parse(sizeofFunc)
 	    -- we are adding so reset this to false
-	    c._sizeof = false
-	 end
+	    --c._sizeof = false
+	 --end
+	 -- disabled by PhoeniX11 ------<<<<<<------
       end
    end
    -- end adding by KS
    --<<<<-----------------------------------------------------------------------<<<<--
    
-   push(c)
-   
-   local s=strsub(b,2,strlen(b)-1)
-   
-   -- hide private: and protected: visibility fields
-   s=s:gsub("(\n)(%sprotected:(.-)(%spublic:))","%1%4")                            
-   s=s:gsub("(\n)(%sprivate:(.-)(%spublic:))","%1%4")
 
    c:parse(s) -- eliminate braces
    pop()

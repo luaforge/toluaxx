@@ -128,11 +128,11 @@ class Object{  //tolua_export
       0,
     );
   }
-  void operator()(int& s/**=0 asnil**/){
+  void operator()(int& s/*$=0 asnil$*/){
     s=0;
   }
   void make(){} //tolua_noexport
 };
 //tolua_end
 
-int get_number(int n=0 /**asnil**/)/**= 0 asnil**/; //tolua_export
+int get_number(int n=0 /*$asnil$*/)/*$= 0 asnil$*/; //tolua_export

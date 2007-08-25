@@ -1,3 +1,4 @@
+$arg --main-gen --auto-gen
 $hfile"tmain.hxx"
 $[
 require"base"

@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_event.c,v 1.9 2007-07-23 18:57:29 phoenix11 Exp $
+** $Id: tolua_event.c,v 1.10 2007-08-25 11:07:04 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -23,11 +23,20 @@
 static void storeatubox (lua_State* L, int lo){
 #ifdef LUA_VERSION_NUM                     /* stack: obj key val */
   lua_getfenv(L, lo);                      /* stack: obj key val ?peer? */
-  if (lua_rawequal(L, -1, TOLUA_NOPEER)) { /* check if ?peer? is no peer really */ /* create peer table */
-    lua_pop(L, 1);                         /* stack: obj key val */
+  if (lua_rawequal(L,-1,TOLUA_NOPEER)) {   /* check if ?peer? is no peer really */ /* create peer table */
+    lua_pop(L,1);                          /* stack: obj key val */
     lua_newtable(L);                       /* stack: obj key val peer */
-    lua_pushvalue(L, -1);                  /* stack: obj key val peer peer */
-    lua_setfenv(L, lo);	                   /* stack: obj key val peer */
+    lua_pushvalue(L,-1);                   /* stack: obj key val peer peer */
+    lua_setfenv(L,lo);	                   /* stack: obj key val peer */
+#  ifndef DISABLE_WATCH_OBJECT /* for testing only >>>>> */
+    /* add env to envtable */
+    lua_pushstring(L,"tolua_envtable");    /* stack: obj key val peer key */
+    lua_gettable(L,LUA_REGISTRYINDEX);     /* stack: obj key val peer envtable */
+    lua_pushvalue(L,-5);                   /* stack: obj key val peer envtable obj */
+    lua_pushvalue(L,-3);                   /* stack: obj key val peer envtable obj peer */
+    lua_settable(L,-3);                    /* stack: obj key val peer envtable */
+    lua_remove(L,-1);                      /* stack: obj key val peer */
+#  endif /*DISABLE_WATCH_OBJECT*/ /* for testing only <<<<< */
   }
   lua_insert(L, -3);                       /* stack: obj peer key val */
   lua_settable(L, -3);                     /* stack: obj peer */
@@ -519,21 +528,27 @@ static int class_call_event(lua_State* L) {
     lua_pushstring(L,".call");              /* stack: obj <args> ".call" */
     lua_rawget(L,1);                        /* stack: obj <args> ?func? */
     if (lua_isfunction(L,-1)) {             /* chack if ?func? is function */
-      DEBUG(lua_insert(L,1));               /* stack: func obj <args> */
+      lua_insert(L,1);                      /* stack: func obj <args> */
       if(lua_gettop(L)>2 && lua_istable(L,-1)){ /* chack if last arg is lua table */
-	DEBUG_FUNC(lua_gettop(L)>2 && lua_istable(L,-1));
 	                                    /* stack: func obj <args> table */
-	DEBUG(lua_insert(L,1));             /* stack: table func obj <args> */
-	DEBUG(lua_call(L,lua_gettop(L)-2,1));      /* stack: table ret */
-	DEBUG(lua_insert(L,-2));                   /* stack: ret table */
-	DEBUG(tolua_class_attribs_from_table(L));  /* stack: ret table */
-	DEBUG(lua_remove(L,-1));                   /* stack: ret */
-	return 1;                           /* stack: ret */
-      }else{
-	                                    /* stack: func obj <args> */
+	lua_insert(L,1);                    /* stack: table func obj <args> */
+	lua_call(L,lua_gettop(L)-2,1);      /* stack: table ret */
+	lua_insert(L,-2);                   /* stack: ret table */
+	tolua_class_attribs_from_table(L);  /* stack: ret table */
+	lua_remove(L,-1);                   /* stack: ret */
+      }else{                                /* stack: func obj <args> */
 	lua_call(L,lua_gettop(L)-1,1);      /* stack: func ret */
-	return 1;                           /* stack: ret */
       }
+#  ifndef DISABLE_WATCH_OBJECT /* for testing only >>>> */
+      /* add obj to objtable */
+      lua_pushstring(L,"tolua_objtable");   /* stack: ret key */
+      lua_gettable(L,LUA_REGISTRYINDEX);    /* stack: ret objtable */
+      lua_pushvalue(L,-2);                  /* stack: ret objtable ret */
+      lua_pushboolean(L,1);                 /* stack: ret objtable ret true */
+      lua_settable(L,-3);                   /* stack: ret objtable */
+      lua_remove(L,-1);                     /* stack: ret */
+#  endif /*DISABLE_WATCH_OBJECT*/ /* for testing only <<<< */
+      return 1;                             /* stack: ret */
     }
   }
   if (lua_isuserdata(L,1)) {           /* stack: obj {args} */
@@ -603,7 +618,6 @@ static int do_unary_operator (lua_State* L, const char* op) {
   tolua_error(L,"Attempt to perform operation on an invalid operand",NULL);
   return 0;
 }
-
 static int class_tostring_event (lua_State* L){
   if (lua_isuserdata(L,1)) {         /* stack: op */
     lua_pushvalue(L,1);              /* stack: op op */
@@ -715,7 +729,24 @@ TOLUA_API int class_gc_event (lua_State* L){
       /*fprintf(stderr, "Using default cleanup\n");*/
       lua_pushcfunction(L,tolua_default_collect);
     }
-
+    
+#  ifndef DISABLE_WATCH_OBJECT /* for testing only >>>> */
+    /* delete obj from objtable */
+    lua_pushstring(L,"tolua_objtable");  /* stack: .. key */
+    lua_gettable(L,LUA_REGISTRYINDEX);   /* stack: .. objtable */
+    lua_pushvalue(L,1);                  /* stack: .. objtable obj */
+    lua_pushnil(L);                      /* stack: .. objtable obj nil */
+    lua_settable(L,-3);                  /* stack: .. objtable */
+    lua_remove(L,-1);                    /* stack: .. */
+    /* delete env from envtable */
+    lua_pushstring(L,"tolua_envtable");  /* stack: .. key */
+    lua_gettable(L,LUA_REGISTRYINDEX);   /* stack: .. envtable */
+    lua_pushvalue(L,1);                  /* stack: .. envtable obj */
+    lua_pushnil(L);                      /* stack: .. envtable obj nil */
+    lua_settable(L,-3);                  /* stack: .. envtable */
+    lua_remove(L,-1);                    /* stack: .. */
+#  endif /*DISABLE_WATCH_OBJECT*/ /* for testing only <<<< */
+    
     lua_pushvalue(L,1);         /* stack: gc umt mt collector u */
     lua_call(L,1,0);
     

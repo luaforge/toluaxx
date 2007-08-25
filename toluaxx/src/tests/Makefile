@@ -28,7 +28,7 @@ build: $(MTARGET)
 	@$(ECHO) "Make all .."
 
 test.main: mmain.x86
-	@$(ECHO) Test main..
+#	@$(ECHO) Test main..
 	@$(PRERUN) ./$< -o2 v2 file
 
 test: $(TTARGET)
@@ -47,14 +47,14 @@ m%.x86: t%.bind.oxx t%.oxx
 	@$(CXX) $^ -o $@ $(XOPTS)
 
 test.%: t%.lua m%.so
-	@$(ECHO) Test $* ..
+#	@$(ECHO) Test $* ..
 	@$(VME) $<
 
 tmain.bind.cxx: tmain.pxx
-	@$(CB) -e o -m -n mmain -o $@ $^
+	@$(CB) -n mmain -o $@ $^
 
 t%.bind.cxx: t%.pxx
-	@$(CB) -n m$* -e o -o $@ $^
+	@$(CB) -n m$* -o $@ $^
 
 t%.bind.test: t%.pxx
 	@$(CB) -P -n m$* $^ > $@

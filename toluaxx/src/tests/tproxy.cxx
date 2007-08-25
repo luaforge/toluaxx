@@ -58,6 +58,7 @@ void GROUP::setobject(string k, OBJECT* o){
 }
 
 #undef DEBUG_MODE
+#undef DEBUG_STACK
 #include<toluaxx.h>
 
 OBJECT* GROUP::getobject(string k){

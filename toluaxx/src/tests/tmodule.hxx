@@ -1,15 +1,15 @@
 //tolua_begin
-/**module A {**/
+/*$module A {$*/
   extern int a;
-/**  module B {**/
+/*$  module B {$*/
     extern int b;
-/**    module C {**/
+/*$    module C {$*/
       extern int c;
-/**    }
+/*$    }
   }
 }
 
-module A {**/
+module A {$*/
   extern int d;
-/**}**/
+/*$}$*/
 //tolua_end

@@ -3,6 +3,8 @@
 using namespace std;
 
 class OBJ{//tolua_export
+protected:
+  char*data;
 public:
   //tolua_begin
   OBJ();
@@ -23,9 +25,11 @@ public:
   GRP();
   virtual ~GRP();
   OBJ *& operator[](string);
-  void operator()(string&n/**="" asnil**/,OBJ*&o/**=NULL**/);
+  void operator()(string&n/*$="" asnil$*/,OBJ*&o/*$=NULL$*/);
   operator string();
   int operator~();
 };
+
+string ident(void*);
 //tolua_end
 

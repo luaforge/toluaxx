@@ -3,7 +3,7 @@
 ** Written by Waldemar Celes
 ** TeCGraf/PUC-Rio
 ** Apr 2003
-** $Id: tolua_map.c,v 1.10 2007-08-14 10:36:19 phoenix11 Exp $
+** $Id: tolua_map.c,v 1.11 2007-08-25 11:07:04 phoenix11 Exp $
 */
 
 /* This code is free software; you can redistribute it and/or modify it.
@@ -52,14 +52,14 @@ static int tolua_newmetatable (lua_State* L, char* name){
   int r = luaL_newmetatable(L,name);
   
 #ifdef LUA_VERSION_NUM /* only lua 5.1 */
-  if (r) {
+  if(r){
     lua_pushvalue(L, -1);
     lua_pushstring(L, name);
     lua_settable(L, LUA_REGISTRYINDEX); /* reg[mt] = type_name */
   };
 #endif
   
-  if (r) tolua_classevents(L); /* set meta events */
+  if(r)tolua_classevents(L); /* set meta events */
   lua_pop(L,1);
   return r;
 }
@@ -470,48 +470,18 @@ static int tolua_bnd_test_get_errors(lua_State* L){ /* test::get_errors */
 	  lua_pushnumber(L,i+1);                 /* stack: {prev} self index */
 	  lua_gettable(L,-2);                    /* stack: {prev} self pass */
 	  lua_pushstring(L,"state");             /* stack: {prev} self pass key */
-	  lua_gettable(L,-2);                    /* stack: {prev} self pass state */
+	  lua_gettable(L,-2);                    /* stack: {prev} self pass st */
 	  if(!lua_toboolean(L,-1)){              /* check if error state */
 	    lua_pop(L,1);                        /* stack: {prev} self pass */
-	    lua_pushstring(L,"check_type");      /* stack: {prev} self pass key */
-	    lua_gettable(L,-2);                  /* stack: {prev} self pass state */
-	    if(!lua_toboolean(L,-1)){  /* check if type error */
-	      lua_pop(L,1);                      /* stack: {prev} self pass */
-	      lua_pushfstring(L,"  failed [%d] //",i+1); /* stack: {prev} self pass msg */
-	      lua_pushstring(L,"description");   /* stack: {prev} self pass msg key */
-	      lua_gettable(L,-3);                /* stack: {prev} self pass msg desc */
-	      lua_pushstring(L,"// type error: received `"); /* stack: {prev} self pass msg desc msg */
-	      lua_pushstring(L,"received_type"); /* stack: {prev} self pass msg desc msg key */
-	      lua_gettable(L,-5);                /* stack: {prev} self pass msg desc msg rt */
-	      lua_pushstring(L,"` expected `");  /* stack: {prev} self pass msg desc msg rt msg */
-	      lua_pushstring(L,"expected_type"); /* stack: {prev} self pass msg desc msg rt msg key */
-	      lua_gettable(L,-7);                /* stack: {prev} self pass msg desc msg rt msg et */
-	      lua_pushstring(L,"`..");           /* stack: {prev} self pass msg desc msg rt msg et msg */
-	      lua_concat(L,7);                   /* stack: {prev} self pass msg */
-	      lua_remove(L,-2);                  /* stack: {prev} self msg */
-	    }else{
-	      lua_pop(L,1);                      /* stack: {prev} self pass */
-	      lua_pushstring(L,"check_value");   /* stack: {prev} self pass key */
-	      lua_gettable(L,-2);                /* stack: {prev} self pass state */
-	      if(!lua_toboolean(L,-1)){ /* check if value error */
-		lua_pop(L,1);                    /* stack: {prev} self pass */
-		lua_pushfstring(L,"  failed [%d] //",i+1); /* stack: {prev} self pass msg */
-		lua_pushstring(L,"description"); /* stack: {prev} self pass msg key */
-		lua_gettable(L,-3);              /* stack: {prev} self pass msg desc */
-		lua_pushstring(L,"// value error: received `"); /* stack: msg self pass msg desc msg */
-		lua_pushstring(L,"received_value"); /* stack: {prev} self pass msg desc msg key */
-		lua_gettable(L,-5);                 /* stack: {prev} self pass msg desc msg rt */
-		lua_pushstring(L,"` expected `");   /* stack: {prev} self pass msg desc msg rt msg */
-		lua_pushstring(L,"expected_value"); /* stack: {prev} self pass msg desc msg rt msg key */
-		lua_gettable(L,-7);                 /* stack: {prev} self pass msg desc msg rt msg et */
-		lua_pushstring(L,"`..");            /* stack: {prev} self pass msg desc msg rt msg et msg */
-		lua_concat(L,7);                    /* stack: {prev} self pass msg */
-		lua_remove(L,-2);                   /* stack: {prev} self msg */
-	      }else{
-		lua_pop(L,1);                 /* stack: {prev} self pass */
-		lua_pop(L,1);                 /* stack: {prev} self */
-	      }
-	    }
+	    lua_pushfstring(L,"  failed [%d] //",i+1); /* stack: {prev} self pass msg1 */
+	    lua_pushstring(L,"description");     /* stack: {prev} self pass msg1 key   */
+	    lua_gettable(L,-3);                  /* stack: {prev} self pass msg1 desc  */
+	    lua_pushstring(L,"// ");             /* stack: {prev} self pass msg1 desc msg2 */
+	    lua_pushstring(L,"message");         /* stack: {prev} self pass msg1 desc msg2 key */
+	    lua_gettable(L,-5);                  /* stack: {prev} self pass msg1 desc msg2 msg */
+	    lua_pushstring(L,"..");              /* stack: {prev} self pass msg1 desc msg2 msg msg3 */
+	    lua_concat(L,5);                     /* stack: {prev} self pass msg */
+	    lua_remove(L,-2);                    /* stack: {prev} self msg */
 	  }else{
 	    lua_pop(L,1);                     /* stack: {prev} self pass */
 	    lua_pop(L,1);                     /* stack: {prev} self */
@@ -560,62 +530,609 @@ static int tolua_bnd_test_get_report(lua_State* L){ /* test::get_report */
   tolua_error(L,"#ferror in function 'get_report'.",&tolua_err);
   return 0;
 }
-static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
+/*typedef enum tolua_test_mode{*/
+  /* x x x x          */
+  /* | | | |          */
+  /* | | | V          */
+  /* | | | type equal */
+  /* | | V            */
+  /* | | value equal  */
+  /* | V              */
+  /* | not strictly   */
+  /* V  */
+  /*    */
+  /**/
+  /*
+  type_not_equal=0x0,tn=0x0,
+  type_equal    =0x7,te=0x7,
+  not_equal     =0x5,ne=0x5,
+  equal         =0x2,eq=0x2,
+  lesser_than   =0x1,lt=0x1,
+  lesser_equal  =0x3,le=0x3,
+  greater_than  =0x4,gt=0x4,
+  greater_equal =0x6,ge=0x6,
+}tolua_test_mode;
+  */
+/*
+  lt + eq = le
+  gt + eq = ge
+  lt + gt = ne
+  le + ge = eq
+  eq = ~ne
+  lt = ~ge
+  le = ~gt
+  
+  lt + ge = 0
+  
+  tn = 000
+  te = 111
+  ne = 101
+  eq = 010
+  lt = 001
+  le = 011
+  gt = 100
+  ge = 110
+*/
+static int tolua_bnd_test_op_tn(lua_State* L){ /* received value, expected value */
   tolua_Error tolua_err;
-  if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))goto tolua_lerror;
-  if(!tolua_isstring(L,4,0,&tolua_err)||
-     !tolua_isnoobj(L,5,&tolua_err))
-    return tolua_bnd_test_get_passed(L);
-  else{
-    tolua_Test*self=(tolua_Test*)tolua_tousertype(L,1,0);
-    /*char*tolua_desc=tolua_tostring(tolua_S,4,0);*/
-    if(!self)tolua_error(L,"invalid 'self' in function 'assert'",NULL);
-    else{
-      self->count=self->count+1;
-      /* give types */
-      tolua_typename(L,2); /* self rv ev desc rvt */
-      tolua_typename(L,3); /* self rv ev desc rvt evt */
-      /* create a new pass result table and place it in peer */
-      lua_newtable(L);                       /* self rv|nv ev|nv desc|nv rvt evt pass */
-      lua_getfenv(L,1);                      /* self rv ev desc rvt evt pass env */
-      lua_pushnumber(L,self->count);         /* self rv ev desc rvt evt pass env num */
-      lua_pushvalue(L,-3);                   /* self rv ev desc rvt evt pass env num pass */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass env */
-      lua_pop(L,1);                          /* self rv ev desc rvt evt pass */
-      /* save test pass result in pass table */
-      lua_pushstring(L,"received_value");    /* self rv ev desc rvt evt pass key */
-      lua_pushvalue(L,2);                    /* self rv ev desc rvt evt pass key value */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      lua_pushstring(L,"expected_value");    /* self rv ev desc rvt evt pass key */
-      lua_pushvalue(L,3);                    /* self rv ev desc rvt evt pass key value */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      lua_pushstring(L,"received_type");     /* self rv ev desc rvt evt pass key */
-      lua_pushvalue(L,5);                    /* self rv ev desc rvt evt pass key type */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      lua_pushstring(L,"expected_type");     /* self rv ev desc rvt evt pass key */
-      lua_pushvalue(L,6);                    /* self rv ev desc rvt evt pass key type */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      /* save test pass description */
-      lua_pushstring(L,"description");       /* self rv ev desc rvt evt pass key */
-      lua_pushvalue(L,4);                    /* self rv ev desc rvt evt pass key desc */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      /* check types */
-      lua_pushstring(L,"check_type");        /* self rv ev desc rvt evt pass key */
-      lua_pushboolean(L,lua_equal(L,5,6));   /* self rv ev desc rvt evt pass key state */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      /* check values */
-      lua_pushstring(L,"check_value");       /* self rv ev desc rvt evt pass key */
-      lua_pushboolean(L,lua_equal(L,2,3));   /* self rv ev desc rvt evt pass key state */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      /* check all */
-      int b=lua_equal(L,2,3)&&lua_equal(L,5,6)?1:0;
-      self->passed=self->passed+b;
-      lua_pushstring(L,"state");             /* self rv ev desc rvt evt pass key */
-      lua_pushboolean(L,b);                  /* self rv ev desc rvt evt pass key state */
-      lua_settable(L,-3);                    /* self rv ev desc rvt evt pass */
-      /* persent passed (progress) */
-      self->progress=self->passed*100/self->count;
+  if(lua_gettop(L)==2){     /* rv ev */
+    /* give types */
+    tolua_typename(L,1);    /* rv ev rvt */
+    tolua_typename(L,2);    /* rv ev rvt evt */
+    if(!lua_equal(L,3,4)){  /* check if rvt != evt */
+      lua_pushboolean(L,1); /* rv ev rvt evt true */
+      return 1;             /* true */
     }
+    lua_pushboolean(L,0);   /* rv ev rvt evt false */
+    lua_pushstring(L,"type of received value is `");
+    lua_pushvalue(L,3);
+    lua_pushstring(L,"`, some as type of expected value");
+    lua_concat(L,3);
+                            /* rv ev rvt evt false msg */
+    return 2;               /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'tn'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_te(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_tn(L); /* rv ev rvt evt stn *msg* */
+    if(!lua_toboolean(L,5)){ /* check if rvt == evt */
+      lua_remove(L,-1);      /* rv ev rvt evt false */
+      lua_remove(L,-1);      /* rv ev rvt evt       */
+      lua_pushboolean(L,1);  /* rv ev rvt evt true  */
+      return 1;
+    }                        /* rv ev rvt evt true  */
+    lua_remove(L,-1);        /* rv ev rvt evt       */
+    lua_pushboolean(L,0);    /* rv ev rvt evt false */
+    lua_pushstring(L,"type of received value is `");
+    lua_pushvalue(L,3);
+    lua_pushstring(L,"`, but type of expected value is `");
+    lua_pushvalue(L,4);
+    lua_pushstring(L,"`");
+    lua_concat(L,5);
+                             /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'te'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_ti(lua_State* L){ /* received value, expected type */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv evt */
+    tolua_typename(L,1);     /* rv evt rvt */
+    if(lua_equal(L,2,3)){    /* check if rvt == evt */
+      lua_pushboolean(L,1);  /* rv evt rvt true  */
+      return 1;
+    }                        /* rv evt rvt */
+    lua_pushboolean(L,0);    /* rv evt rvt false */
+    lua_pushstring(L,"type of received value is `");
+    lua_pushvalue(L,3);
+    lua_pushstring(L,"`, but expected type is `");
+    lua_pushvalue(L,2);
+    lua_pushstring(L,"`");
+    lua_concat(L,5);
+                             /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'ti'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_ni(lua_State* L){ /* received value, not expected type */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv evt */
+    tolua_typename(L,1);     /* rv evt rvt */
+    if(!lua_equal(L,2,3)){   /* check if rvt != evt */
+      lua_pushboolean(L,1);  /* rv evt rvt true  */
+      return 1;
+    }                        /* rv evt rvt */
+    lua_pushboolean(L,0);    /* rv evt rvt false */
+    lua_pushstring(L,"type of received value is `");
+    lua_pushvalue(L,3);
+    lua_pushstring(L,"`, but expected type is not `");
+    lua_pushvalue(L,2);
+    lua_pushstring(L,"`");
+    lua_concat(L,5);
+                             /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'ni'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_ne(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_te(L); /* rv ev rvt evt ste *msg* */
+    if(lua_toboolean(L,5)){  /* rv ev rvt evt ste?true  */
+      if(!lua_equal(L,1,2)){ /* check if rv != ev */
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`");
+      lua_pushvalue(L,1);
+      lua_pushstring(L,"` (received value) not not equal `");
+      lua_pushvalue(L,2);
+      lua_pushstring(L,"` (expected value)");
+      lua_concat(L,5);
+      return 2;              /* false msg */
+    }                        /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'ne'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_eq(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_te(L); /* rv ev rvt evt ste *msg* */
+    if(lua_toboolean(L,5)){  /* rv ev rvt evt ste?true  */
+      if(lua_equal(L,1,2)){  /* check if rv == ev */
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`");
+      lua_pushvalue(L,1);
+      lua_pushstring(L,"` (received value) not equal `");
+      lua_pushvalue(L,2);
+      lua_pushstring(L,"` (expected value)");
+      lua_concat(L,5);
+      return 2;              /* false msg */
+    }                        /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'eq'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_se(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  lua_pushstring(L,"tostring");     /* rv ev key */
+  lua_gettable(L,LUA_GLOBALSINDEX); /* rv ev *func* */
+  if(!lua_isfunction(L,-1)){        /* rv ev ?func? */
+    tolua_error(L,"#ferror in function 'se'. function `tostring` undefined in globals",&tolua_err);
+    return 0;
+  }
+  if(lua_gettop(L)==3){        /* rv ev func */
+    lua_pushvalue(L,3);        /* rv ev func func */
+    lua_pushvalue(L,1);        /* rv ev func func rv */
+    lua_pcall(L,1,1,0);        /* rv ev func srv */
+    lua_insert(L,-2);          /* rv ev srv func */
+    lua_pushvalue(L,2);        /* rv ev srv func ev */
+    lua_pcall(L,1,1,0);        /* rv ev srv sev */
+    if(lua_equal(L,-2,-1)){    /* check if srv == sev */
+      lua_pushboolean(L,1);    /* rv ev srv sev true */
+      return 1;                /* true */
+    }
+    lua_pushboolean(L,0);      /* rv ev srv sev false */
+    lua_pushstring(L,"`");
+    lua_pushvalue(L,3);
+    lua_pushstring(L,"` (received value) not string equal `");
+    lua_pushvalue(L,4);
+    lua_pushstring(L,"` (expected value)");
+    lua_concat(L,5);       /* rv ev srv sev false msg */
+    return 2;              /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'se'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_sn(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  lua_pushstring(L,"tostring");     /* rv ev key */
+  lua_gettable(L,LUA_GLOBALSINDEX); /* rv ev *func* */
+  if(!lua_isfunction(L,-1)){        /* rv ev ?func? */
+    tolua_error(L,"#ferror in function 'sn'. function `tostring` undefined in globals",&tolua_err);
+    return 0;
+  }
+  if(lua_gettop(L)==3){        /* rv ev func */
+    lua_pushvalue(L,3);        /* rv ev func func */
+    lua_pushvalue(L,1);        /* rv ev func func rv */
+    lua_pcall(L,1,1,0);        /* rv ev func srv */
+    lua_insert(L,-2);          /* rv ev srv func */
+    lua_pushvalue(L,2);        /* rv ev srv func ev */
+    lua_pcall(L,1,1,0);        /* rv ev srv sev */
+    if(!lua_equal(L,-2,-1)){   /* check if srv == sev */
+      lua_pushboolean(L,1);    /* rv ev srv sev true */
+      return 1;                /* true */
+    }
+    lua_pushboolean(L,0);      /* rv ev srv sev false */
+    lua_pushstring(L,"`");
+    lua_pushvalue(L,3);
+    lua_pushstring(L,"` (received value) not not string equal `");
+    lua_pushvalue(L,4);
+    lua_pushstring(L,"` (expected value)");
+    lua_concat(L,5);       /* rv ev srv sev false msg */
+    return 2;              /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'sn'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_lt(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_te(L); /* rv ev rvt evt ste *msg* */
+    if(lua_toboolean(L,5)){  /* rv ev rvt evt ste?true  */
+      if(lua_lessthan(L,1,2)){  /* check if rv < ev */
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`");
+      lua_pushvalue(L,1);
+      lua_pushstring(L,"` (received value) not lesser than `");
+      lua_pushvalue(L,2);
+      lua_pushstring(L,"` (expected value)");
+      lua_concat(L,5);
+      return 2;              /* false msg */
+    }                        /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'lt'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_le(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_te(L); /* rv ev rvt evt ste *msg* */
+    if(lua_toboolean(L,5)){  /* rv ev rvt evt ste?true  */
+      if(lua_lessthan(L,1,2)||lua_equal(L,1,2)){  /* check if rv < ev */
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`");
+      lua_pushvalue(L,1);
+      lua_pushstring(L,"` (received value) not lesser equal `");
+      lua_pushvalue(L,2);
+      lua_pushstring(L,"` (expected value)");
+      lua_concat(L,5);
+      return 2;              /* false msg */
+    }                        /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'le'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_gt(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_te(L); /* rv ev rvt evt ste *msg* */
+    if(lua_toboolean(L,5)){  /* rv ev rvt evt ste?true  */
+      if(lua_lessthan(L,2,1)){  /* check if rv < ev */
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`");
+      lua_pushvalue(L,1);
+      lua_pushstring(L,"` (received value) not greater than `");
+      lua_pushvalue(L,2);
+      lua_pushstring(L,"` (expected value)");
+      lua_concat(L,5);
+      return 2;              /* false msg */
+    }                        /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'gt'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_ge(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2){      /* rv ev */
+    tolua_bnd_test_op_te(L); /* rv ev rvt evt ste *msg* */
+    if(lua_toboolean(L,5)){  /* rv ev rvt evt ste?true  */
+      if(lua_lessthan(L,2,1)||lua_equal(L,2,1)){  /* check if rv < ev */
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`");
+      lua_pushvalue(L,1);
+      lua_pushstring(L,"` (received value) not greater equal `");
+      lua_pushvalue(L,2);
+      lua_pushstring(L,"` (expected value)");
+      lua_concat(L,5);
+      return 2;              /* false msg */
+    }                        /* rv ev rvt evt false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'ge'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_bw(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2&&tolua_istable(L,2,0,&tolua_err)){ /* rv tev */
+    lua_pushnumber(L,1);     /* rv tev 1 */
+    lua_gettable(L,2);       /* rv tev ev1 */
+    lua_pushnumber(L,2);     /* rv tev ev1 2 */
+    lua_gettable(L,2);       /* rv tev ev1 ev2 */
+    lua_remove(L,2);         /* rv ev1 ev2 */
+    tolua_typename(L,1);     /* rv ev1 ev2 rvt */
+    tolua_typename(L,2);     /* rv ev1 ev2 rvt evt1 */
+    tolua_typename(L,3);     /* rv ev1 ev2 rvt evt1 evt2 */
+    if(lua_equal(L,4,5)&&lua_equal(L,5,6)){ /* type checking */
+      if(lua_lessthan(L,2,1)&&
+	 lua_lessthan(L,1,3)){  /* check if ev1 < rv < ev2 */
+	lua_pushboolean(L,1);
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`"); /* rv ev rvt evt ste false "`" */
+      lua_pushvalue(L,1);    /* rv ev rvt evt ste false "`" rv */
+      lua_pushstring(L,"` (received value) not between { `"); /* rv ev rvt evt ste false "`" rv "not in { `" */
+      lua_pushvalue(L,2);    /* rv ev rvt evt ste false "`" rv "` not in { `" ev1      */
+      lua_pushstring(L,"`, `");/* rv ev rvt evt ste false "`" rv "` not in { `" ev1 "`, `" */
+      lua_pushvalue(L,3);    /* rv ev rvt evt ste false "`" rv "` not in { `" ev1 "`, `" ev2 */
+      lua_pushstring(L,"` } (expected values)");/* rv ev rvt evt ste false "`" rv "` not in { `" ev1 "`, `" ev2 "` }" */
+      lua_concat(L,7);       /* rv ev1 ev2 rvt evt1 evt2 ste false msg */
+      return 2;              /* false msg */
+    }                        /* rv ev1 ev2 rvt evt1 evt2 */
+    lua_pushboolean(L,0);
+    lua_pushstring(L,"type of received value is `");
+    lua_pushvalue(L,4);
+    lua_pushstring(L,"` but type of expected values is `");
+    lua_pushvalue(L,5);
+    lua_pushstring(L,"` and `");
+    lua_pushvalue(L,6);
+    lua_pushstring(L,"`");
+    lua_concat(L,7);         /* rv ev rvt evt ste false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'bw'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_on(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err;
+  if(lua_gettop(L)==2&&tolua_istable(L,2,0,&tolua_err)){ /* rv tev */
+    lua_pushnumber(L,1);     /* rv tev 1 */
+    lua_gettable(L,2);       /* rv tev ev1 */
+    lua_pushnumber(L,2);     /* rv tev ev1 2 */
+    lua_gettable(L,2);       /* rv tev ev1 ev2 */
+    lua_remove(L,2);         /* rv ev1 ev2 */
+    tolua_typename(L,1);     /* rv ev1 ev2 rvt */
+    tolua_typename(L,2);     /* rv ev1 ev2 rvt evt1 */
+    tolua_typename(L,3);     /* rv ev1 ev2 rvt evt1 evt2 */
+    if(lua_equal(L,4,5)&&lua_equal(L,5,6)){ /* type checking */
+      if((lua_lessthan(L,2,1)||lua_equal(L,2,1))&&
+	 (lua_lessthan(L,1,3)||lua_equal(L,1,3))){  /* check if ev1 <= rv <= ev2 */
+	lua_pushboolean(L,1);
+	return 1;            /* true */
+      }
+      lua_pushboolean(L,0);  /* rv ev rvt evt ste false */
+      lua_pushstring(L,"`"); /* rv ev rvt evt ste false "`" */
+      lua_pushvalue(L,1);    /* rv ev rvt evt ste false "`" rv */
+      lua_pushstring(L,"` (received value) not onto { `"); /* rv ev rvt evt ste false "`" rv "not in { `" */
+      lua_pushvalue(L,2);    /* rv ev rvt evt ste false "`" rv "` not in { `" ev1      */
+      lua_pushstring(L,"`, `");/* rv ev rvt evt ste false "`" rv "` not in { `" ev1 "`, `" */
+      lua_pushvalue(L,3);    /* rv ev rvt evt ste false "`" rv "` not in { `" ev1 "`, `" ev2 */
+      lua_pushstring(L,"` } (expected values)");/* rv ev rvt evt ste false "`" rv "` not in { `" ev1 "`, `" ev2 "` }" */
+      lua_concat(L,7);       /* rv ev1 ev2 rvt evt1 evt2 ste false msg */
+      return 2;              /* false msg */
+    }                        /* rv ev1 ev2 rvt evt1 evt2 */
+    lua_pushboolean(L,0);
+    lua_pushstring(L,"type of received value is `");
+    lua_pushvalue(L,4);
+    lua_pushstring(L,"` but type of expected values is `");
+    lua_pushvalue(L,5);
+    lua_pushstring(L,"` and `");
+    lua_pushvalue(L,6);
+    lua_pushstring(L,"`");
+    lua_concat(L,7);         /* rv ev rvt evt ste false msg */
+    return 2;                /* false msg */
+  }
+  tolua_error(L,"#ferror in function 'on'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_oo(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err; /* one of */
+  lua_pushstring(L,"tostring");     /* rv tev key */
+  lua_gettable(L,LUA_GLOBALSINDEX); /* rv tev *func* */
+  if(lua_isfunction(L,-1)){        /* rv tev ?func? */
+    lua_insert(L,1);               /* func rv tev */
+    if(lua_gettop(L)==3&&tolua_istable(L,3,0,&tolua_err)){ /* func rv tev */
+      tolua_typename(L,2);       /* func rv tev rvt */
+      lua_pushstring(L,"");      /* func rv tev rvt msg */
+      lua_pushnil(L);            /* func rv tev rvt msg nil */
+      for(;lua_next(L,3);){      /* func rv tev rvt msg key */
+	tolua_typename(L,-1);    /* func rv tev rvt msg key evi evit */
+	//printf("%s\n",tolua_stackexplore(L));
+	if(lua_equal(L,4,-1)){   /* type checking rvt==evit */
+	  if(lua_equal(L,2,-2)){ /* values checking rv==evi */
+	    lua_pushboolean(L,1);
+	    return 1;            /* true */
+	  }
+	}                        /* func rv tev rvt msg key evi evit */
+	lua_remove(L,-1);        /* func rv tev rvt msg key evi */
+	lua_insert(L,-2);        /* func rv tev rvt msg evi key */
+	lua_insert(L,-3);        /* func rv tev rvt key msg evi */
+	if(lua_objlen(L,-2)){
+	  lua_pushstring(L,", `"); /* func rv tev rvt key msg evi msg1 */
+	}else{
+	  lua_pushstring(L,"`");   /* func rv tev rvt key msg evi msg1 */
+	}
+	lua_insert(L,-2);          /* func rv tev rvt key msg msg1 evi */
+	//if(lua_isnil(L,-1)){
+	//  lua_remove(L,-1);
+	//  lua_pushstring(L,"nil");
+	//}
+	//printf("%s\n",tolua_stackexplore(L));
+	lua_pushvalue(L,1);        /* func rv tev rvt key msg msg1 evi func */
+	lua_insert(L,-2);          /* func rv tev rvt key msg msg1 func evi */
+	lua_pcall(L,1,1,0);        /* func rv tev rvt key msg msg1 sevi */
+	lua_pushstring(L,"`");     /* func rv tev rvt key msg msg1 sevi msg2 */
+	lua_concat(L,4);           /* func rv tev rvt key msg */
+	lua_insert(L,-2);          /* func rv tev rvt msg key */
+      }                         /* func rv tev rvt msg */
+      lua_pushboolean(L,0);  /* func rv tev rvt msg false */
+      lua_pushstring(L,"`"); /* func rv tev rvt msg false msg1 */
+      lua_pushvalue(L,2);    /* func rv tev rvt msg false msg1 rv */
+      //if(lua_isnil(L,-1)){
+      //lua_remove(L,-1);
+      //lua_pushstring(L,"nil");
+      //}
+      //printf("%s\n",tolua_stackexplore(L));
+      lua_pushvalue(L,1);    /* func rv tev rvt msg false msg1 rv func */
+      lua_insert(L,-2);      /* func rv tev rvt msg false msg1 func rv */
+      lua_pcall(L,1,1,0);    /* func rv tev rvt msg false msg1 srv */
+      lua_pushstring(L,"` (received value) not one of { "); /* func rv tev rvt msg false msg1 rv msg2 */
+      lua_pushvalue(L,5); /* func rv tev rvt msg false msg1 rv msg2 msg */
+      lua_pushstring(L," } (expected values)"); /* func rv tev rvt msg false msg1 rv msg2 msg msg3 */
+      lua_concat(L,5);       /* func rv tev rvt msg false msg */
+      return 2;              /* false msg */
+    }
+  }
+  tolua_error(L,"#ferror in function 'oo'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_op_no(lua_State* L){ /* received value, expected value */
+  tolua_Error tolua_err; /* one of */
+  lua_pushstring(L,"tostring");     /* rv tev key */
+  lua_gettable(L,LUA_GLOBALSINDEX); /* rv tev *func* */
+  if(lua_isfunction(L,-1)){        /* rv tev ?func? */
+    lua_insert(L,1);               /* func rv tev */
+    if(lua_gettop(L)==3&&tolua_istable(L,3,0,&tolua_err)){ /* func rv tev */
+      tolua_typename(L,2);       /* func rv tev rvt */
+      lua_pushnil(L);            /* func rv tev rvt nil */
+      for(;lua_next(L,3);){      /* func rv tev rvt key */
+	tolua_typename(L,-1);    /* func rv tev rvt key evi evit */
+	//printf("%s\n",tolua_stackexplore(L));
+	if(lua_equal(L,4,-1)){   /* type checking rvt==evit */
+	  if(lua_equal(L,2,-2)){ /* values checking rv==evi */
+	    lua_pushboolean(L,0);  /* func rv tev rvt key evi evit false */
+	    lua_pushstring(L,"`"); /* func rv tev rvt key evi evit false msg1 */
+	    lua_pushvalue(L,2);    /* func rv tev rvt key evi evit false msg1 rv */
+	    lua_pushvalue(L,1);    /* func rv tev rvt key evi evit false msg1 rv func */
+	    lua_insert(L,-2);      /* func rv tev rvt key evi evit false msg1 func rv */
+	    lua_pcall(L,1,1,0);    /* func rv tev rvt key evi evit false msg1 srv */
+	    lua_pushstring(L,"` (received value) is `");
+	                           /* func rv tev rvt key evi evit false msg1 srv msg2 */
+	    lua_pushvalue(L,1);    /* func rv tev rvt key evi evit false msg1 srv msg2 func */
+	    lua_pushvalue(L,6);    /* func rv tev rvt key evi evit false msg1 srv msg2 func evi */
+	    lua_pcall(L,1,1,0);    /* func rv tev rvt key evi evit false msg1 srv msg2 sev */
+	    lua_pushstring(L,"` one of (expected values)"); /* func rv tev rvt key evi evit false msg1 srv msg2 sev msg3 */
+	    lua_concat(L,5);       /* func rv tev rvt msg false msg */
+	    return 2;            /* true */
+	  }
+	}                        /* func rv tev rvt key evi evit */
+	lua_remove(L,-1);        /* func rv tev rvt key evi */
+	lua_remove(L,-1);        /* func rv tev rvt key */
+      }                          /* func rv tev rvt */
+      lua_pushboolean(L,1);  /* func rv tev rvt msg true */
+      return 1;              /* false msg */
+    }
+  }
+  tolua_error(L,"#ferror in function 'oo'.",&tolua_err);
+  return 0;
+}
+static int tolua_bnd_test_assert(lua_State* L){ /* test pass assert */
+  tolua_Error tolua_err;                /* self rv ev *op* *desc* */
+  if(!tolua_isusertype(L,1,"tolua::test",0,&tolua_err))goto tolua_lerror;
+  if(lua_gettop(L)==1)return tolua_bnd_test_get_passed(L);
+  if(lua_isfunction(L,4)){              /* self rv ev ?op? *desc* */
+                                        /* self rv ev  op  *desc* */
+  }else{                                /* self rv ev *desc*      */
+    lua_pushstring(L,"eq");             /* self rv ev *desc* "op" */
+    lua_gettable(L,1);                  /* self rv ev *desc*  op  */
+    if(lua_gettop(L)==5){               /* check if ?desc?        */
+      lua_insert(L,-2);                 /* self rv ev op  desc    */
+    }                                   /* self rv ev op *desc*   */
+  }
+  if(tolua_isstring(L,5,0,&tolua_err)){ /* self rv ev op ?desc?   */
+                                        /* self rv ev op  desc    */
+  }else{                                /* self rv ev op          */
+    /*
+    switch(op){
+    case tolua_test_mode::tn:
+      lua_pushstring(L,"type of received value not same type of expected value"); break;
+    case tolua_test_mode::te:
+      lua_pushstring(L,"type of received value some as type of expected value"); break;
+    case tolua_test_mode::ne:
+      lua_pushstring(L,"received value ~= expected value"); break;
+    case tolua_test_mode::eq:
+      lua_pushstring(L,"received value == expected value"); break;
+    case tolua_test_mode::lt:
+      lua_pushstring(L,"received value < expected value"); break;
+    case tolua_test_mode::le:
+      lua_pushstring(L,"received value <= expected value"); break;
+    case tolua_test_mode::gt:
+      lua_pushstring(L,"received value > expected value"); break;
+    case tolua_test_mode::ge:
+      lua_pushstring(L,"received value >= expected value"); break;
+    default:
+      lua_pushstring(L,"user defined checking operation");
+    }                                   /* self rv ev op  desc    */
+    lua_pushstring(L,"default checking operation"); /* self rv ev op desc */
+  }
+  tolua_Test*self=(tolua_Test*)tolua_tousertype(L,1,0);
+  /*char*tolua_desc=tolua_tostring(tolua_S,4,0);*/
+  if(!self)tolua_error(L,"invalid 'self' in function 'assert'",NULL);
+  else{
+    self->count=self->count+1;             /* self rv ev op desc */
+    /* create a new pass result table and place it in peer */
+    lua_newtable(L);                       /* self rv ev op desc pass */
+    lua_getfenv(L,1);                      /* self rv ev op desc pass env */
+    lua_pushnumber(L,self->count);         /* self rv ev op desc pass env key */
+    lua_pushvalue(L,-3);                   /* self rv ev op desc pass env key pass */
+    lua_settable(L,-3);                    /* self rv ev op desc pass env */
+    lua_pop(L,1);                          /* self rv ev op desc pass */
+    /* pack description */
+    lua_insert(L,-2);                      /* self rv ev op pass desc */
+    lua_pushstring(L,"description");       /* self rv ev op pass desc key */
+    lua_insert(L,-2);                      /* self rv ev op pass key desc */
+    lua_settable(L,-3);                    /* self rv ev op pass */
+    /* pack received value */
+    lua_pushstring(L,"received");          /* self rv ev op pass key */
+    lua_pushvalue(L,2);                    /* self rv ev op pass key rv */
+    lua_settable(L,-3);                    /* self rv ev op pass */
+    /* pack expected value */
+    lua_pushstring(L,"expected");          /* self rv ev op pass key */
+    lua_pushvalue(L,3);                    /* self rv ev op pass key ev */
+    lua_settable(L,-3);                    /* self rv ev op pass */
+    /* pack operation */
+    lua_pushstring(L,"operation");         /* self rv ev op pass key */
+    lua_pushvalue(L,4);                    /* self rv ev op pass key op */
+    lua_settable(L,-3);                    /* self rv ev op pass */
+    /* test value */
+    lua_insert(L,-4);                      /* self pass rv ev op */
+    lua_insert(L,-3);                      /* self pass op rv ev */
+    lua_pcall(L,2,-1,0);                   /* self pass st *msg* */
+    if(lua_isstring(L,-1)){                /* self pass st ?msg? */
+      lua_pushstring(L,"message");         /* self pass st  msg key */
+      lua_pushvalue(L,-2);                 /* self pass st  msg key msg */
+      lua_settable(L,-5);                  /* self pass st  msg */
+      lua_insert(L,-3);                    /* self msg pass st */
+    }else if(!lua_toboolean(L,-1)){        /* self pass st?false */
+      lua_pushstring(L,"undefined error!");/* self pass st  msg */
+      lua_pushstring(L,"message");         /* self pass st  msg key */
+      lua_pushvalue(L,-2);                 /* self pass st  msg key msg */
+      lua_settable(L,-5);                  /* self pass st  msg */
+      lua_insert(L,-3);                    /* self msg pass st */
+    }
+    /* count passed */
+    self->passed+=lua_toboolean(L,-1)?1:0;
+    /* persent passed (progress) */
+    self->progress=self->passed*100/self->count;
+    lua_pushstring(L,"state");             /* self *msg* pass st key */
+    lua_pushvalue(L,-2);                   /* self *msg* pass st key st */
+    lua_settable(L,-4);                    /* self *msg* pass st */
+    if(!lua_isstring(L,-3))return 1;       /* self ?msg? pass st */
+    lua_pushvalue(L,-3);                   /* self *msg* pass st *msg* */
+    return 2;
   }
   return 0;
  tolua_lerror:
@@ -876,6 +1393,45 @@ static int tolua_bnd_proxy_top(lua_State* L){
 }
 #endif /* ifndef DISABLE_PROXY_TECHNIQUES */
 
+#ifndef DISABLE_WATCH_OBJECT /* for testing only >>>> */
+static int tolua_watch_object_len(lua_State* L){
+  unsigned long i;                              /* stack: table|ud .. */
+  if(lua_isuserdata(L,1)){                      /* stack: ?userdata? */
+    lua_getfenv(L,1);                           /* stack: userdata table */
+  }
+  if(lua_istable(L,-1)){                          /* stack: .. table */
+    lua_pushnil(L);                               /* stack: .. table nil */
+    for(i=0;lua_next(L,-2);lua_remove(L,-1),i++); /* stack: .. table key */
+    lua_pushnumber(L,i);                          /* stack: .. table key len */
+    return 1;                                     /* stack: len */
+  }
+  return 0;
+}
+static int tolua_watch_object_next(lua_State* L){
+  if(lua_isuserdata(L,1)){
+    lua_getfenv(L,1);
+  }
+  if(lua_istable(L,-1)){
+    lua_pushvalue(L,3);
+    if(!lua_next(L,-2))return 0;
+    return 2;
+  }
+  return 0;
+}
+static int tolua_watch_object_get(lua_State* L){
+  unsigned long i;                              /* stack: table|ud key .. */
+  if(lua_isuserdata(L,1)){                      /* stack: ?userdata? */
+    lua_getfenv(L,1);                           /* stack: userdata key table */
+    lua_insert(L,-2);                           /* stack: userdata table key */
+  }
+  if(lua_istable(L,-2)){                        /* stack: .. table key */
+    lua_gettable(L,-2);                         /* stack: .. table key true */
+    return 1;                                   /* stack: true */
+  }
+  return 0;
+}
+#endif /* #ifndef DISABLE_WATCH_OBJECT */ /* for testing only <<<< */
+
 /* static int class_gc_event (lua_State* L); */
 
 TOLUA_API void tolua_open (lua_State* L){
@@ -907,6 +1463,27 @@ TOLUA_API void tolua_open (lua_State* L){
     lua_pushstring(L,"tolua_gc");    lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
     lua_pushstring(L,"tolua_node");  lua_newtable(L); lua_rawset(L,LUA_REGISTRYINDEX);
     
+#ifndef DISABLE_WATCH_OBJECT /* for testing only >>>> */
+    lua_newtable(L);                            /* stack: .. mt */
+    lua_pushliteral(L,"__mode");                /* stack: .. mt key */
+    lua_pushliteral(L,"kv");                    /* stack: .. mt key val */
+    lua_rawset(L,-3);                           /* stack: .. mt */
+    /* env table */
+    lua_pushstring(L,"tolua_envtable");         /* stack: .. mt name */
+    lua_newtable(L);                            /* stack: .. mt name table */
+    lua_pushvalue(L,-3);                        /* stack: .. mt name table mt */
+    lua_setmetatable(L,-2);                     /* stack: .. mt name table */
+    lua_rawset(L,LUA_REGISTRYINDEX);            /* stack: .. mt */
+    /* obj table */
+    lua_pushstring(L,"tolua_objtable");         /* stack: .. mt name */
+    lua_newtable(L);                            /* stack: .. mt name table */
+    lua_pushvalue(L,-3);                        /* stack: .. mt name table mt */
+    lua_setmetatable(L,-2);                     /* stack: .. mt name table */
+    lua_rawset(L,LUA_REGISTRYINDEX);            /* stack: .. mt */
+    lua_remove(L,-1);                           /* stack: .. */
+#endif /*DISABLE_WATCH_OBJECT*/ /* for testing only <<<< */
+
+#ifndef DISABLE_PROXY_TECHNIQUES
     /* create proxy table */
     lua_pushstring(L,"tolua_proxy");
     lua_newtable(L);
@@ -916,6 +1493,7 @@ TOLUA_API void tolua_open (lua_State* L){
     lua_rawset(L,-3);
     /* register proxy table */
     lua_rawset(L,LUA_REGISTRYINDEX);
+#endif
     
     /* create gc_event closure */
     lua_pushstring(L, "tolua_gc_event");
@@ -945,13 +1523,13 @@ TOLUA_API void tolua_open (lua_State* L){
 #ifndef DISABLE_TEST_FRAMEWORK
     /* test framework class */
     tolua_usertype(L,"tolua::test");
-    tolua_cclass(L,"test","tolua::test","",NULL);
+    tolua_cclass(L,"test","tolua::test","",tolua_bnd_test_del);
     tolua_beginmodule(L,"test");
     tolua_function(L,"new",        tolua_bnd_test_new);
     tolua_function(L,".call",      tolua_bnd_test_new);
     tolua_function(L,"delete",     tolua_bnd_test_del);
     tolua_function(L,".len",       tolua_bnd_test_get_count);
-    tolua_function(L,"accert",     tolua_bnd_test_assert);
+    tolua_function(L,"assert",     tolua_bnd_test_assert);
     tolua_function(L,".callself",  tolua_bnd_test_assert);
     tolua_function(L,".string",    tolua_bnd_test_get_report);
     /* test variables */
@@ -965,6 +1543,60 @@ TOLUA_API void tolua_open (lua_State* L){
     tolua_variable(L,"report",     tolua_bnd_test_get_report,NULL);
     tolua_variable(L,"result",     tolua_bnd_test_get_result,NULL);
     tolua_variable(L,"errors",     tolua_bnd_test_get_errors,NULL);
+    /* test operation */
+    /* type specific */
+    tolua_function(L,"type_is",          tolua_bnd_test_op_ti);
+    tolua_function(L,"ti",               tolua_bnd_test_op_ti);
+    tolua_function(L,"type_not_is",      tolua_bnd_test_op_ni);
+    tolua_function(L,"tni",              tolua_bnd_test_op_ni);
+    tolua_function(L,"ni",               tolua_bnd_test_op_ni);
+    /* type equivalence */
+    tolua_function(L,"type_not_equal",   tolua_bnd_test_op_tn);
+    tolua_function(L,"tneq",             tolua_bnd_test_op_tn);
+    tolua_function(L,"tne",              tolua_bnd_test_op_tn);
+    tolua_function(L,"tn",               tolua_bnd_test_op_tn);
+    tolua_function(L,"type_equal",       tolua_bnd_test_op_te);
+    tolua_function(L,"teq",              tolua_bnd_test_op_te);
+    tolua_function(L,"te",               tolua_bnd_test_op_te);
+    /* equivalence */
+    tolua_function(L,"not_equal",        tolua_bnd_test_op_ne);
+    tolua_function(L,"neq",              tolua_bnd_test_op_ne);
+    tolua_function(L,"ne",               tolua_bnd_test_op_ne);
+    tolua_function(L,"equal",            tolua_bnd_test_op_eq);
+    tolua_function(L,"eq",               tolua_bnd_test_op_eq);
+    /* lesser */
+    tolua_function(L,"lesser_than",      tolua_bnd_test_op_lt);
+    tolua_function(L,"lessthan",         tolua_bnd_test_op_lt);
+    tolua_function(L,"lt",               tolua_bnd_test_op_lt);
+    tolua_function(L,"lesser_equal",     tolua_bnd_test_op_le);
+    tolua_function(L,"lessequal",        tolua_bnd_test_op_le);
+    tolua_function(L,"le",               tolua_bnd_test_op_le);
+    /* greater */
+    tolua_function(L,"greater_than",     tolua_bnd_test_op_gt);
+    tolua_function(L,"greatthan",        tolua_bnd_test_op_gt);
+    tolua_function(L,"gt",               tolua_bnd_test_op_gt);
+    tolua_function(L,"greater_equal",    tolua_bnd_test_op_ge);
+    tolua_function(L,"greatequal",       tolua_bnd_test_op_ge);
+    tolua_function(L,"ge",               tolua_bnd_test_op_ge);
+    /* interval */
+    tolua_function(L,"between",          tolua_bnd_test_op_bw);
+    tolua_function(L,"bw",               tolua_bnd_test_op_bw);
+    tolua_function(L,"onto",             tolua_bnd_test_op_on);
+    tolua_function(L,"on",               tolua_bnd_test_op_on);
+    /* one of / not one of*/
+    tolua_function(L,"one_of",           tolua_bnd_test_op_oo);
+    tolua_function(L,"oneof",            tolua_bnd_test_op_oo);
+    tolua_function(L,"oo",               tolua_bnd_test_op_oo);
+    tolua_function(L,"not_one_of",       tolua_bnd_test_op_no);
+    tolua_function(L,"notoneof",         tolua_bnd_test_op_no);
+    tolua_function(L,"no",               tolua_bnd_test_op_no);
+    /* tostring equivalence */
+    tolua_function(L,"string_equal",     tolua_bnd_test_op_se);
+    tolua_function(L,"streq",            tolua_bnd_test_op_se);
+    tolua_function(L,"se",               tolua_bnd_test_op_se);
+    tolua_function(L,"string_not_equal", tolua_bnd_test_op_sn);
+    tolua_function(L,"strneq",           tolua_bnd_test_op_sn);
+    tolua_function(L,"sn",               tolua_bnd_test_op_sn);
     /* test node class */
     /*tolua_cclass(L,"node","tolua::test::node","",NULL);
     //tolua_beginmodule(L,"node");
@@ -983,6 +1615,42 @@ TOLUA_API void tolua_open (lua_State* L){
     tolua_function(L,"set",  tolua_bnd_proxy_set);
     tolua_function(L,"get",  tolua_bnd_proxy_get);
     tolua_function(L,"level",tolua_bnd_proxy_level);
+    tolua_endmodule(L);
+#endif
+
+#ifndef DISABLE_WATCH_OBJECT
+    tolua_module(L,"watch",0);
+    tolua_beginmodule(L,"watch");
+    /* create metatable */                      /* stack: .. mod */
+    lua_newtable(L);                            /* stack: .. mod mt  */
+    lua_pushliteral(L,"__len");                 /* stack: .. mod mt key */
+    lua_pushcfunction(L,tolua_watch_object_len);/* stack: .. mod mt key func */
+    lua_rawset(L,-3);                           /* stack: .. mod mt */
+    lua_pushliteral(L,"__call");                   /* stack: .. mod mt key */
+    lua_pushcfunction(L,tolua_watch_object_next);  /* stack: .. mod mt key func */
+    lua_rawset(L,-3);                              /* stack: .. mod mt */
+    lua_pushliteral(L,"__index");                  /* stack: .. mod mt key */
+    lua_pushcfunction(L,tolua_watch_object_get);   /* stack: .. mod mt key func */
+    lua_rawset(L,-3);                              /* stack: .. mod mt */
+    /* create object access point */    /* stack: .. mod mt */
+    lua_pushstring(L,"object");         /* stack: .. mod mt name */
+    lua_newuserdata(L,1);               /* stack: .. mod mt name point */
+    lua_pushstring(L,"tolua_objtable"); /* stack: .. mod mt name point key */
+    lua_gettable(L,LUA_REGISTRYINDEX);  /* stack: .. mod mt name point objtable */
+    lua_setfenv(L,-2);                  /* stack: .. mod mt name point */
+    lua_pushvalue(L,-3);                /* stack: .. mod mt name point mt */
+    lua_setmetatable(L,-2);             /* stack: .. mod mt name point */
+    lua_settable(L,-4);                 /* stack: .. mod mt */
+    /* create objenv access point */    /* stack: .. mod mt */
+    lua_pushstring(L,"objenv");         /* stack: .. mod mt name */
+    lua_newuserdata(L,1);               /* stack: .. mod mt name point */
+    lua_pushstring(L,"tolua_envtable"); /* stack: .. mod mt name point key */
+    lua_gettable(L,LUA_REGISTRYINDEX);  /* stack: .. mod mt name point envtable */
+    lua_setfenv(L,-2);                  /* stack: .. mod mt name point */
+    lua_pushvalue(L,-3);                /* stack: .. mod mt name point mt */
+    lua_setmetatable(L,-2);             /* stack: .. mod mt name point */
+    lua_settable(L,-4);                 /* stack: .. mod mt */
+    lua_remove(L,-1);                   /* stack: .. mod */
     tolua_endmodule(L);
 #endif
     
