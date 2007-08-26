@@ -30,6 +30,10 @@ public:
   int operator~();
 };
 
+extern long tolua_alloc_count;
+void SetAllocHook();
+void CreateUserdata();
+
 string ident(void*);
 //tolua_end
 

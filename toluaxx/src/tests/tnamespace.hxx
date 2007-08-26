@@ -28,4 +28,15 @@ namespace B {
 namespace C {
   extern int c;
 }
+
+namespace D {
+  class D{
+  public:
+    int d;
+    D(){}
+    ~D(){}
+    int getd()const{return d;}
+    void setd(int d){D::d=d;}
+  };
+}
 //tolua_end

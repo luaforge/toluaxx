@@ -1,6 +1,8 @@
 require"base"
 require"mgcind"
 
+SetAllocHook()
+
 local t=test("Garbage collecting indexed")
 
 t(#tolua.watch.object,1,"Num of objects must be 1")
@@ -47,38 +49,76 @@ for i=0,100 do
 end
 
 collectgarbage"collect"
-print(collectgarbage"count")
+print(collectgarbage"count",tolua_alloc_count)
 
 g1.o1=nil
 t(g1.o1,nil,"g1.o1=nil")
 
 collectgarbage"collect"
-print(collectgarbage"count")
+print(collectgarbage"count",tolua_alloc_count)
 
 g1.o2=nil
 t(g1.o2,nil,"g1.o2=nil")
 
 collectgarbage"collect"
-print(collectgarbage"count")
+print(collectgarbage"count",tolua_alloc_count)
 
 function test_collector(msg)
-   print(msg,"\n","objects #",#tolua.watch.object,"envs #",#tolua.watch.objenv,collectgarbage"count","Kb")
+   print(msg,"\n","objects #",#tolua.watch.object,"envs #",#tolua.watch.objenv,"GCcount:",collectgarbage"count","Kb","TLcount:",tolua_alloc_count/1024,"Kb")
 end
 
 local M,N=10,1000
+
+test_collector("Before creating")
+print("create",N,"objects (operation may be take more time, please wait)....")
 for j=1,M do
-   print("Collector test cycle",M)
+   --print("Collector test cycle",j)
    collectgarbage"stop"
-   test_collector("Before creating")
-   print("create",N,"objects (operation may be take more time, please wait)....")
    for i=1,N do
       local o=OBJ()
       t(tolua.watch.object[o],true,"local o=OBJ()")
    end
-   test_collector("After creating")
+   --test_collector("After creating")
    --collectgarbage"restart"
    collectgarbage"collect"
-   test_collector("After collecting")
 end
+test_collector("After collecting")
+
+local M,N=10,1000
+print("Collector test cycle",j)
+collectgarbage"stop"
+test_collector("Before creating")
+print("create",N,"objects (operation may be take more time, please wait)....")
+for j=1,M do
+   local n=18
+   local d="safjsnfnsdfsdf"
+   for i=1,N do
+      local o={n=18,d="safjsnfnsdfsdf"}
+      --t(tolua.watch.object[o],true,"local o={}")
+   end
+   local k={n=18,d="safjsnfnsdfsdf"}
+end
+test_collector("After creating")
+--collectgarbage"restart"
+collectgarbage"collect"
+test_collector("After collecting")
+
+
+local M,N=100,100000
+print("Collector test cycle",j)
+collectgarbage"stop"
+test_collector("Before creating")
+print("create",N,"objects (operation may be take more time, please wait)....")
+for j=1,M do
+   for i=1,N do
+      CreateUserdata()
+      --t(tolua.watch.object[o],true,"local o={}")
+   end
+end
+test_collector("After creating")
+--collectgarbage"restart"
+collectgarbage"collect"
+test_collector("After collecting")
+
 
 test()
